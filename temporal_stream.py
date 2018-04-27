@@ -12,17 +12,18 @@ import config
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 
-# temporal_stream.py [train|retrain|test] {batch} {classes} {epochs} {sample rate} {old epochs}
+# temporal_stream.py [train|retrain|test]{+cross} {batch} {classes} {epochs} {sample rate} {old epochs} {cross index}
 if len(sys.argv) < 6:
     print 'Missing agrument'
     print r'Ex: temporal_stream.py train {batch} {classes} {epochs} {sample rate}'
     sys.exit()
 
-if sys.argv[1] == 'train':
+process = sys.argv[1].split('+')
+if process[0] == 'train':
     train = True
     retrain = False
     old_epochs = 0
-elif sys.argv[1] == 'retrain':
+elif process[0] == 'retrain':
     if len(sys.argv) < 7:
         print 'Missing agrument'
         print r'Ex: temporal_stream.py retrain {batch} {classes} {epochs} {sample rate} {old epochs}'
@@ -45,11 +46,21 @@ input_shape = (224,224,depth)
 server = config.server()
 data_output_path = config.data_output_path()
 
-if train:
-    out_file = r'{}database/train-opt{}.pickle'.format(data_output_path,opt_size)
-    valid_file = r'{}database/test-opt{}.pickle'.format(data_output_path,opt_size)
+cross_index = 0
+cross_validation = False
+if (len(process) > 1) :
+    if (process[1] == 'cross'):
+        cross_validation = True
+        cross_index = int(sys.argv[len(sys.argv)-1])
+
+if not cross_validation:
+    if train:
+        out_file = r'{}database/train-opt{}.pickle'.format(data_output_path,opt_size)
+        valid_file = r'{}database/test-opt{}.pickle'.format(data_output_path,opt_size)
+    else:
+        out_file = r'{}database/test-opt{}.pickle'.format(data_output_path,opt_size)
 else:
-    out_file = r'{}database/test-opt{}.pickle'.format(data_output_path,opt_size)
+    out_file = r'{}database/cross-opt{}.pickle'.format(data_output_path,opt_size)
 
 # MobileNet model
 if train & (not retrain):
@@ -93,17 +104,25 @@ result_model.compile(loss='categorical_crossentropy',
 
 if train:
     if retrain:
-        result_model.load_weights('weights/temporal{}_{}e.h5'.format(opt_size,old_epochs))
+        result_model.load_weights('weights/temporal{}_{}e_cr{}.h5'.format(opt_size,old_epochs,cross_index))
     else:
         result_model.get_layer('conv_new').set_weights(gd.convert_weights(layers[2].get_weights(), depth))
 
-    with open(out_file,'rb') as f1:
-        keys = pickle.load(f1)
-    len_samples = len(keys)
-    
-    with open(valid_file,'rb') as f2:
-        keys_valid = pickle.load(f2)
-    len_valid = len(keys_valid)
+    if not cross_validation:
+        with open(out_file,'rb') as f1:
+            keys = pickle.load(f1)
+        len_samples = len(keys)
+
+        with open(valid_file,'rb') as f2:
+            keys_valid = pickle.load(f2)
+        len_valid = len(keys_valid)
+    else:
+        with open(out_file,'rb') as f1:
+            keys_cross = pickle.load(f1)
+        keys, keys_valid = gd.get_data_cross_validation(keys_cross,cross_index)
+
+        len_samples = len(keys)
+        len_valid = len(keys_valid)
 
     print('-'*40)
     print 'MobileNet Temporal{} stream: Training'.format(opt_size)
@@ -148,17 +167,24 @@ if train:
             history.history['val_loss'],
             run_time
         ])
-        result_model.save_weights('weights/temporal{}_{}e.h5'.format(opt_size,old_epochs+1+e))
+        result_model.save_weights('weights/temporal{}_{}e_cr{}.h5'.format(opt_size,old_epochs+1+e,cross_index))
 
-        with open('histories/temporal{}_{}_{}e'.format(opt_size, old_epochs, epochs), 'wb') as file_pi:
+        with open('histories/temporal{}_{}_{}e_cr{}'.format(opt_size, old_epochs, epochs,cross_index), 'wb') as file_pi:
             pickle.dump(histories, file_pi)
 
 else:
-    result_model.load_weights('weights/temporal{}_{}e.h5'.format(opt_size,epochs))
+    result_model.load_weights('weights/temporal{}_{}e_cr{}.h5'.format(epochs,cross_index))
 
-    with open(out_file,'rb') as f2:
-        keys = pickle.load(f2)
+    if not cross_validation:
+        with open(out_file,'rb') as f2:
+            keys = pickle.load(f2)
+    else:
+        with open(out_file,'rb') as f1:
+            keys_cross = pickle.load(f1)
+        keys_train, keys = gd.get_data_cross_validation(keys_cross,cross_index)
+
     len_samples = len(keys)
+
     print('-'*40)
     print 'MobileNet Temporal{} stream: Testing'.format(opt_size)
     print('-'*40)

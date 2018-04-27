@@ -12,17 +12,18 @@ import config
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 
-# spatial_stream.py [train|retrain|test] {batch} {classes} {epochs} {sample rate} {old epochs}
+# spatial_stream.py [train|retrain|test]{+cross} {batch} {classes} {epochs} {sample rate} {old epochs} {cross index}
 if len(sys.argv) < 6:
     print 'Missing agrument'
     print r'Ex: spatial_stream.py train {batch} {classes} {epochs} {sample rate}'
     sys.exit()
 
-if sys.argv[1] == 'train':
+process = sys.argv[1].split('+')
+if process[0] == 'train':
     train = True
     retrain = False
     old_epochs = 0
-elif sys.argv[1] == 'retrain':
+elif process[0] == 'retrain':
     if len(sys.argv) < 7:
         print 'Missing agrument'
         print r'Ex: spatial_stream.py retrain {batch} {classes} {epochs} {sample rate} {old epochs}'
@@ -42,11 +43,21 @@ sample_rate = int(sys.argv[5])
 server = config.server()
 data_output_path = config.data_output_path()
 
-if train:
-    out_file = r'{}database/train-rgb{}.pickle'.format(data_output_path,sample_rate)
-    valid_file = r'{}database/test-rgb{}.pickle'.format(data_output_path,sample_rate)
+cross_index = 0
+cross_validation = False
+if (len(process) > 1) :
+    if (process[1] == 'cross'):
+        cross_validation = True
+        cross_index = int(sys.argv[len(sys.argv)-1])
+
+if not cross_validation:
+    if train:
+        out_file = r'{}database/train-rgb{}.pickle'.format(data_output_path,sample_rate)
+        valid_file = r'{}database/test-rgb{}.pickle'.format(data_output_path,sample_rate)
+    else:
+        out_file = r'{}database/test-rgb{}.pickle'.format(data_output_path,sample_rate)
 else:
-    out_file = r'{}database/test-rgb{}.pickle'.format(data_output_path,sample_rate)
+    out_file = r'{}database/cross-rgb{}.pickle'.format(data_output_path,sample_rate)
 
 # MobileNet model
 if train & (not retrain):
@@ -74,15 +85,23 @@ result_model.compile(loss='categorical_crossentropy',
 
 if train:
     if retrain:
-        result_model.load_weights('weights/spatial_{}e.h5'.format(old_epochs))
+        result_model.load_weights('weights/spatial_{}e_cr{}.h5'.format(old_epochs,cross_index))
 
-    with open(out_file,'rb') as f1:
-        keys = pickle.load(f1)
-    len_samples = len(keys)
+    if not cross_validation:
+        with open(out_file,'rb') as f1:
+            keys = pickle.load(f1)
+        len_samples = len(keys)
 
-    with open(valid_file,'rb') as f2:
-        keys_valid = pickle.load(f2)
-    len_valid = len(keys_valid)
+        with open(valid_file,'rb') as f2:
+            keys_valid = pickle.load(f2)
+        len_valid = len(keys_valid)
+    else:
+        with open(out_file,'rb') as f1:
+            keys_cross = pickle.load(f1)
+        keys, keys_valid = gd.get_data_cross_validation(keys_cross,cross_index)
+
+        len_samples = len(keys)
+        len_valid = len(keys_valid)
 
     print('-'*40)
     print('Spatial stream only: Training')
@@ -102,8 +121,7 @@ if train:
         print('Epoch', e+1)
         print('-'*40)
 
-        if server:
-            random.shuffle(keys)
+        random.shuffle(keys)
 
         time_start = time.time()
 
@@ -127,16 +145,22 @@ if train:
             history.history['val_loss'],
             run_time
         ])
-        result_model.save_weights('weights/spatial_{}e.h5'.format(old_epochs+1+e))
+        result_model.save_weights('weights/spatial_{}e_cr{}.h5'.format(old_epochs+1+e,cross_index))
 
-        with open('histories/spatial{}_{}_{}e'.format(sample_rate,old_epochs,epochs), 'wb') as file_pi:
+        with open('histories/spatial{}_{}_{}e_cr{}'.format(sample_rate,old_epochs,epochs,cross_index), 'wb') as file_pi:
             pickle.dump(histories, file_pi)
 
 else:
-    result_model.load_weights('weights/spatial_{}e.h5'.format(epochs))
+    result_model.load_weights('weights/spatial_{}e_cr{}.h5'.format(epochs,cross_index))
 
-    with open(out_file,'rb') as f2:
-        keys = pickle.load(f2)
+    if not cross_validation:
+        with open(out_file,'rb') as f2:
+            keys = pickle.load(f2)
+    else:
+        with open(out_file,'rb') as f1:
+            keys_cross = pickle.load(f1)
+        keys_train, keys = gd.get_data_cross_validation(keys_cross,cross_index)
+    
     len_samples = len(keys)
 
     print('-'*40)
@@ -150,7 +174,6 @@ else:
     else:
         Y_test = gd.getClassData(keys, 10*batch_size)
         steps = 10
-        random.shuffle(keys)
 
     time_start = time.time()
 

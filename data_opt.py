@@ -71,6 +71,10 @@ with open(text_file) as f1:
         path = data_output_folder + folder_video + '/' # return data-output/folder/
         video_class = classInd.index(folder_video) # index cua video
 
+        group = 0
+        if train == 'cross':
+            group = int(line.rstrip().split(' ')[2])
+
         if not os.path.isdir(path):
             os.makedirs(path) # tao data-ouput/folder/
             print 'Start with ' + path
@@ -98,7 +102,7 @@ with open(text_file) as f1:
             if m%sample_rate == 0:
 
                 if (k%opt_rate == 0) & (k > 9):
-                    data.append([folder_video + '/' + name_video, 2*(k-10), video_class])
+                    data.append([folder_video + '/' + name_video, 2*(k-10), video_class, group])
                     c+=1
                     if (c % 1000 == 0):
                         print r'Created {} samples'.format(c)
@@ -128,7 +132,7 @@ with open(text_file) as f1:
             m+=1
 
         if ((k%opt_rate > int(opt_rate/2)) | (k%opt_rate == 0)) & (k > 9):
-            data.append([folder_video + '/' + name_video, 2*(k-10), video_class])
+            data.append([folder_video + '/' + name_video, 2*(k-10), video_class, group])
             c+=1
             if (c % 1000 == 0):
                 print r'Created {} samples'.format(c)

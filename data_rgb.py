@@ -67,6 +67,10 @@ with open(text_file) as f:
         path = data_output_folder + folder_video + '/' #return data-output/folder/
         video_class = classInd.index(folder_video) # index cua video
 
+        group = 0
+        if train == 'cross':
+            group = int(line.rstrip().split(' ')[2])
+
         # tao folder moi neu chua ton tai
         if not os.path.isdir(path):
             os.makedirs(path)
@@ -98,7 +102,7 @@ with open(text_file) as f:
 
                 cv2.imwrite(r'{}-{}.jpg'.format(name_video, i),resize_img)
 
-            data.append([folder_video + '/' + name_video, i, video_class])
+            data.append([folder_video + '/' + name_video, i, video_class, group])
 
             count += 1
             if (count % 1000 == 0):

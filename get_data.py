@@ -87,6 +87,19 @@ def getScorePerVideo(result, data):
     y_classes = resultVideoArr.argmax(axis=-1)
     return (classification_report(classVideoArr, y_classes, digits=6))
 
+def get_data_cross_validation(keys_cross,cross_index):
+    length = len(keys_cross)
+    train_data = []
+    test_data = []
+    for i in range(length):
+        if keys_cross[i][3] != cross_index:
+            train_data.append(keys_cross[i])
+        else:
+            test_data.append(keys_cross[i])
+
+    return train_data, test_data
+
+
 def stack_rgb(sample,start_rgb):
     folder_rgb = sample[0]
     rgb = cv2.imread(data_folder_rgb + folder_rgb + '-' + str(start_rgb) + '.jpg')
