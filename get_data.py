@@ -154,12 +154,12 @@ def stack_single_stream(chunk,opt_size,batch_size):
 
 def stack_two_stream(chunk,multi_opt_size,batch_size):
     labels = []
-    stack_rgb = []
+    stack_rgbs = []
     stack_opt = []
 
     opt_bare = multi_opt_size[1]
     for sample in chunk:
-        labels.append(opt[2])
+        labels.append(sample[2])
 
         for opt_size in multi_opt_size:
             if opt_size == 0:
@@ -168,7 +168,7 @@ def stack_two_stream(chunk,multi_opt_size,batch_size):
                     start_rgb = (int(np.floor(start_opt * opt_bare / 20)) + 1 ) * 10
                 else:
                     start_rgb = int(start_opt * opt_bare / 2)
-                stack_rgb.append(stack_rgb(sample,start_rgb))
+                stack_rgbs.append(stack_rgb(sample,start_rgb))
             else:
                 opt_bare = opt_size
                 start_opt = sample[1]
@@ -179,7 +179,7 @@ def stack_two_stream(chunk,multi_opt_size,batch_size):
         print 'Stacked data error'
         sys.exit()
 
-    return [np.array(stack_rgb), np.array(stack_opt)], labels
+    return [np.array(stack_rgbs), np.array(stack_opt)], labels
 
 def stack_multi_stream(chunk,multi_opt_size,batch_size):
     labels = []
