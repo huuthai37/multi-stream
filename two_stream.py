@@ -127,7 +127,7 @@ z = Dense(classes, activation='softmax')(z)
 
 # Final touch
 result_model = Model(inputs=[input_x, input_y], outputs=z)
-result_model.summary()
+# result_model.summary()
 # Run
 result_model.compile(loss='categorical_crossentropy',
               optimizer=optimizers.SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True),
