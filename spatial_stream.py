@@ -188,24 +188,24 @@ else:
     y_classes = y_pred.argmax(axis=-1)
     print 'Score per samples'
     print(classification_report(Y_test, y_classes, digits=6))
-    with open('results/spatial.txt', 'w+') as fw1:
+    with open('results/spatial-cr{}.txt'.format(cross_index), 'w+') as fw1:
         fw1.write(classification_report(Y_test, y_classes, digits=6))
         fw1.write('\nRun time: ' + str(run_time))
 
     if server:
         print 'Score per video'
         print(gd.getScorePerVideo(y_pred, keys))
-        with open('results/spatial-v.txt', 'w+') as fw2:
+        with open('results/spatial-cr{}-v.txt'.format(cross_index), 'w+') as fw2:
             fw2.write(gd.getScorePerVideo(y_pred, keys))
     else:
         print 'Score per video'
         print(gd.getScorePerVideo(y_pred, keys[0:10*batch_size]))
-        with open('results/spatial-v.txt', 'w+') as fw2:
+        with open('results/spatial-cr{}-v.txt'.format(cross_index), 'w+') as fw2:
             fw2.write(gd.getScorePerVideo(y_pred, keys[0:10*batch_size]))
 
     print 'Confusion matrix'
     print confusion_matrix(Y_test, y_classes)
-    with open('results/spatial-cf.txt','wb') as fw3:
+    with open('results/spatial-cr{}-cf.txt'.format(cross_index),'wb') as fw3:
         pickle.dump(confusion_matrix(Y_test, y_classes),fw3)
 
     print 'Run time: {}'.format(run_time)
