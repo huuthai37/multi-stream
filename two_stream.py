@@ -200,7 +200,7 @@ if train:
             pickle.dump(histories, file_pi)
 
 else:
-    result_model.load_weights('weights/two{}_{}e_cr{}.h5'.format(epochs,cross_index))
+    result_model.load_weights('weights/two{}_{}e_cr{}.h5'.format(opt_size,epochs,cross_index))
 
     if not cross_validation:
         with open(out_file,'rb') as f2:
