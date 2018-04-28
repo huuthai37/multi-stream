@@ -210,24 +210,24 @@ else:
     y_classes = y_pred.argmax(axis=-1)
     print 'Score per samples'
     print(classification_report(Y_test, y_classes, digits=6))
-    with open('results/temporal{}.txt'.format(opt_size), 'w+') as fw1:
+    with open('results/temporal{}-cr{}.txt'.format(opt_size,cross_index), 'w+') as fw1:
         fw1.write(classification_report(Y_test, y_classes, digits=6))
         fw1.write('\nRun time: ' + str(run_time))
 
     if server:
         print 'Score per video'
         print(gd.getScorePerVideo(y_pred, keys))
-        with open('results/temporal{}-v.txt'.format(opt_size), 'w+') as fw2:
+        with open('results/temporal{}-v-cr{}.txt'.format(opt_size,cross_index), 'w+') as fw2:
             fw2.write(gd.getScorePerVideo(y_pred, keys))
     else:
         print 'Score per video'
         print(gd.getScorePerVideo(y_pred, keys[0:10*batch_size]))
-        with open('results/temporal{}-v.txt'.format(opt_size), 'w+') as fw2:
+        with open('results/temporal{}-v-cr{}.txt'.format(opt_size,cross_index), 'w+') as fw2:
             fw2.write(gd.getScorePerVideo(y_pred, keys[0:10*batch_size]))
 
     print 'Confusion matrix'
     print(confusion_matrix(Y_test, y_classes))
-    with open('results/temporal{}-cf.txt'.format(opt_size),'wb') as fw3:
+    with open('results/temporal{}-cf-cr{}.txt'.format(opt_size,cross_index),'wb') as fw3:
         pickle.dump(confusion_matrix(Y_test, y_classes),fw3)
 
     print 'Run time: {}'.format(run_time)
