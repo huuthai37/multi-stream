@@ -146,7 +146,7 @@ def stack_single_stream(chunk,opt_size,batch_size):
             start_opt = opt[1]
             stack_return.append(stack_optical_flow(opt,start_opt,data_folder_opt))
 
-    if len(stack_return) < batch_size:
+    if len(stack_return) < len(chunk):
         print 'Stacked data error'
         sys.exit()
 
@@ -175,7 +175,7 @@ def stack_two_stream(chunk,multi_opt_size,batch_size):
                 data_folder_opt = r'{}opt{}/'.format(data_output_path,opt_size)
                 stack_opt.append(stack_optical_flow(sample,start_opt,data_folder_opt))
 
-    if len(stack_opt) < batch_size:
+    if len(stack_opt) < len(chunk):
         print 'Stacked data error'
         sys.exit()
 
@@ -208,7 +208,7 @@ def stack_multi_stream(chunk,multi_opt_size,batch_size):
                 stack_return[s].append(stack_optical_flow(sample,start_opt,data_folder_opt))
             s+=1
 
-    if len(stack_return[0]) < batch_size:
+    if len(stack_return[0]) < len(chunk):
         print 'Stacked data error'
         sys.exit()
 
