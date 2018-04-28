@@ -75,7 +75,8 @@ if train:
         inputs=input_x, 
         input_shape=(224,224,3), 
         classes=classes,
-        weight='weights/spatial_{}e_cr{}.h5'.format(spa_epochs,cross_index))
+        weight='weights/spatial_{}e_cr{}.h5'.format(spa_epochs,cross_index),
+        non_train=True)
 else:
     x = mobilenet.mobilenet_by_me(
         name='spatial', 
@@ -91,7 +92,8 @@ if train:
         inputs=input_y, 
         input_shape=(224,224,20), 
         classes=classes,
-        weight='weights/temporal{}_{}e_cr{}.h5'.format(opt_size,temp_epochs,cross_index))
+        weight='weights/temporal{}_{}e_cr{}.h5'.format(opt_size,temp_epochs,cross_index),
+        non_train=True)
 else:
     y = mobilenet.mobilenet_by_me(
     name='temporal', 
@@ -125,7 +127,7 @@ z = Dense(classes, activation='softmax')(z)
 
 # Final touch
 result_model = Model(inputs=[input_x, input_y], outputs=z)
-
+result_model.summary()
 # Run
 result_model.compile(loss='categorical_crossentropy',
               optimizer=optimizers.SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True),

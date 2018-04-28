@@ -7,7 +7,7 @@ from keras.layers import DepthwiseConv2D, Dense, Conv2D, Activation, BatchNormal
 def relu6(x):
     return K.relu(x, max_value=6)
 
-def mobilenet_by_me(name, inputs, input_shape, classes, weight = '', cut = 5):
+def mobilenet_by_me(name, inputs, input_shape, classes, weight = '', cut = 5, non_train=False):
     model = keras.applications.mobilenet.MobileNet(
         include_top=True,
         dropout=0.5
@@ -39,6 +39,8 @@ def mobilenet_by_me(name, inputs, input_shape, classes, weight = '', cut = 5):
 
     y = inputs
     for i in range(0, len(new_layers)-cut):
+        if non_train:
+            new_layers[i].trainable = False
         y = new_layers[i](y)
 
     return y
