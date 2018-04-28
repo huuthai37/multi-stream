@@ -133,7 +133,7 @@ result_model.compile(loss='categorical_crossentropy',
 
 if train:
     if retrain:
-        result_model.load_weights('weights/two{}_{}e_cr{}.h5'.format(opt_size,old_epochs,cross_index))
+        result_model.load_weights('weights/two{}_{}_{}e_cr{}.h5'.format(opt_size,fusion,old_epochs,cross_index))
 
     if not cross_validation:
         with open(out_file,'rb') as f1:
@@ -194,13 +194,13 @@ if train:
             history.history['val_loss'],
             run_time
         ])
-        result_model.save_weights('weights/two{}_{}e_cr{}.h5'.format(opt_size,old_epochs+1+e,cross_index))
+        result_model.save_weights('weights/two{}_{}_{}e_cr{}.h5'.format(opt_size,fusion,old_epochs+1+e,cross_index))
 
-        with open('histories/two{}_{}_{}e_cr{}'.format(opt_size, old_epochs, epochs,cross_index), 'wb') as file_pi:
+        with open('histories/two{}_{}_{}_{}e_cr{}'.format(opt_size,fusion,old_epochs, epochs,cross_index), 'wb') as file_pi:
             pickle.dump(histories, file_pi)
 
 else:
-    result_model.load_weights('weights/two{}_{}e_cr{}.h5'.format(opt_size,epochs,cross_index))
+    result_model.load_weights('weights/two{}_{}_{}e_cr{}.h5'.format(opt_size,fusion,epochs,cross_index))
 
     if not cross_validation:
         with open(out_file,'rb') as f2:
@@ -237,24 +237,24 @@ else:
     y_classes = y_pred.argmax(axis=-1)
     print 'Score per samples'
     print(classification_report(Y_test, y_classes, digits=6))
-    with open('results/two{}-cr{}.txt'.format(opt_size,cross_index), 'w+') as fw1:
+    with open('results/two{}-{}-cr{}.txt'.format(opt_size,fusion,cross_index), 'w+') as fw1:
         fw1.write(classification_report(Y_test, y_classes, digits=6))
         fw1.write('\nRun time: ' + str(run_time))
 
     if server:
         print 'Score per video'
         print(gd.getScorePerVideo(y_pred, keys))
-        with open('results/two{}-v-cr{}.txt'.format(opt_size,cross_index), 'w+') as fw2:
+        with open('results/two{}-{}-v-cr{}.txt'.format(opt_size,fusion,cross_index), 'w+') as fw2:
             fw2.write(gd.getScorePerVideo(y_pred, keys))
     else:
         print 'Score per video'
         print(gd.getScorePerVideo(y_pred, keys[0:10*batch_size]))
-        with open('results/two{}-v-cr{}.txt'.format(opt_size,cross_index), 'w+') as fw2:
+        with open('results/two{}-{}-v-cr{}.txt'.format(opt_size,fusion,cross_index), 'w+') as fw2:
             fw2.write(gd.getScorePerVideo(y_pred, keys[0:10*batch_size]))
 
     print 'Confusion matrix'
     print(confusion_matrix(Y_test, y_classes))
-    with open('results/two{}-cf-cr{}.txt'.format(opt_size,cross_index),'wb') as fw3:
+    with open('results/two{}-{}-cf-cr{}.txt'.format(opt_size,fusion,cross_index),'wb') as fw3:
         pickle.dump(confusion_matrix(Y_test, y_classes),fw3)
 
     print 'Run time: {}'.format(run_time)

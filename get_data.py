@@ -8,6 +8,7 @@ from keras.utils import np_utils
 import config
 from sklearn.metrics import classification_report
 from keras import backend as K
+import math
 
 server = config.server()
 data_output_path = config.data_output_path()
@@ -108,6 +109,8 @@ def stack_rgb(sample,start_rgb):
     return rgb
 
 def stack_optical_flow(sample,start_opt,data_folder):
+    if not server:
+        return np.zeros((224,224,20))
     folder_opt = sample[0] + '/'
     arrays = []
 
@@ -186,24 +189,27 @@ def stack_multi_stream(chunk,multi_opt_size,batch_size):
     returns = []
     stack_return = []
 
+    if len(chunk[0]) < 7:
+        print 'Input chunk error'
+        sys.exit()
+
+    if 3 in multi_opt_size:
+        print 'Optical flow sample rate 3 not support!!!'
+        sys.exit()
+
     for opt_size in multi_opt_size:
         stack_return.append([])
 
-    opt_bare = multi_opt_size[len(multi_opt_size)-1]
     for sample in chunk:
-        labels.append(opt[2])
+        labels.append(sample[2])
 
         s = 0
         for opt_size in multi_opt_size:
             if opt_size == 0:
                 start_rgb = sample[1]
-                if (start_opt % 20 > 0):
-                    start_rgb = (int(np.floor(start_opt * opt_bare / 20)) + 1 ) * 10
-                else:
-                    start_rgb = int(start_opt * opt_bare / 2)
                 stack_return[s].append(stack_rgb(sample,start_rgb))
             else:
-                start_opt = sample[1]
+                start_opt = sample[4+int(math.log(opt_size,2))]
                 data_folder_opt = r'{}opt{}/'.format(data_output_path,opt_size)
                 stack_return[s].append(stack_optical_flow(sample,start_opt,data_folder_opt))
             s+=1
