@@ -252,6 +252,56 @@ def stack_seq_rgb(path_video):
         return_stack.append(rgb)
     return np.array(return_stack)
 
+def stack_seq_optical_flow(path_video,render_opt,opt_size):
+    # if not server:
+    #     return np.zeros((3,224,224,20))
+    arrays = []
+    return_data = []
+    if len(render_opt) == 3:
+        for k in range(3):
+            for i in range(k*20, k*20 + 20):
+                img = cv2.imread(data_folder_seq + path_video + '/opt' + str(opt_size) + '-' + str(i) + '.jpg', 0)
+                if img is None:
+                    print 'Error render optical flow'
+                    sys.exit()
+                height, width = img.shape
+                crop_pos = int((width-height)/2)
+                img = img[:,crop_pos:crop_pos+height]
+                resize_img = cv2.resize(img, (224, 224))
+
+                resize_img = resize_img.astype('float16',copy=False)
+                resize_img/=255
+                opt_nor = resize_img - resize_img.mean()
+
+                arrays.append(opt_nor)
+
+            nstack = np.dstack(arrays)
+            arrays = []
+            return_data.append(nstack)
+    else:
+        for i in range(20):
+            img = cv2.imread(data_folder_seq + path_video + '/opt' + str(opt_size) + '-' + str(i) + '.jpg', 0)
+            if img is None:
+                print 'Error render optical flow'
+                sys.exit()
+            height, width = img.shape
+            crop_pos = int((width-height)/2)
+            img = img[:,crop_pos:crop_pos+height]
+            resize_img = cv2.resize(img, (224, 224))
+
+            resize_img = resize_img.astype('float16',copy=False)
+            resize_img/=255
+            opt_nor = resize_img - resize_img.mean()
+
+            arrays.append(opt_nor)
+
+        nstack = np.dstack(arrays)
+        return_data.append(nstack)
+        return_data.append(nstack)
+        return_data.append(nstack)
+
+    return np.array(return_data)
+
 def stack_single_seq(chunk,opt_size,batch_size):
     labels = []
     stack_return = []
@@ -263,8 +313,7 @@ def stack_single_seq(chunk,opt_size,batch_size):
         data_folder_opt = r'{}opt{}/'.format(data_output_path,opt_size[0])
         for opt in chunk:
             labels.append(opt[2])
-            start_opt = opt[1]
-            stack_return.append(stack_optical_flow(opt,start_opt,data_folder_opt))
+            stack_return.append(stack_seq_optical_flow(opt[0],opt[1],opt_size[0]))
 
     if len(stack_return) < len(chunk):
         print 'Stacked data error'
