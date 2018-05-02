@@ -233,7 +233,7 @@ with open(text_file) as f:
 
                             resize_img = cv2.resize(crop, (224, 224))
 
-                            cv2.imwrite('rgb-{}.jpg'.format(rgb_render.index(i)+1),resize_img)
+                            cv2.imwrite('rgb-{}.jpg'.format(rgb_render.index(i)),resize_img)
                 cap.release()
             else:
                 continue
