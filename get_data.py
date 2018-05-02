@@ -13,8 +13,9 @@ import math
 server = config.server()
 data_output_path = config.data_output_path()
 data_folder_rgb = r'{}rgb/'.format(data_output_path)
+data_folder_seq = r'{}seq3/'.format(data_output_path)
 
-def getTrainData(keys,batch_size,classes,mode,train,opt_size): 
+def getTrainData(keys,batch_size,classes,mode,train,opt_size,seq=False): 
     """
     mode 1: Single Stream
     mode 2: Two Stream
@@ -22,23 +23,42 @@ def getTrainData(keys,batch_size,classes,mode,train,opt_size):
     """
     while 1:
         for i in range(0, len(keys), batch_size):
-            if mode == 1:
-                X_train, Y_train = stack_single_stream(
-                    chunk=keys[i:i+batch_size],
-                    opt_size=opt_size,
-                    batch_size=batch_size)
+            if not seq:
+                if mode == 1:
+                    X_train, Y_train = stack_single_stream(
+                        chunk=keys[i:i+batch_size],
+                        opt_size=opt_size,
+                        batch_size=batch_size)
 
-            elif mode == 2:
-                X_train, Y_train = stack_two_stream(
-                    chunk=keys[i:i+batch_size],
-                    multi_opt_size=opt_size,
-                    batch_size=batch_size)
+                elif mode == 2:
+                    X_train, Y_train = stack_two_stream(
+                        chunk=keys[i:i+batch_size],
+                        multi_opt_size=opt_size,
+                        batch_size=batch_size)
 
+                else:
+                    X_train, Y_train=stack_multi_stream(
+                        chunk=keys[i:i+batch_size],
+                        multi_opt_size=opt_size,
+                        batch_size=batch_size)
             else:
-                X_train, Y_train=stack_multi_stream(
-                    chunk=keys[i:i+batch_size],
-                    multi_opt_size=opt_size,
-                    batch_size=batch_size)
+                if mode == 1:
+                    X_train, Y_train = stack_single_seq(
+                        chunk=keys[i:i+batch_size],
+                        opt_size=opt_size,
+                        batch_size=batch_size)
+
+                elif mode == 2:
+                    X_train, Y_train = stack_two_seq(
+                        chunk=keys[i:i+batch_size],
+                        multi_opt_size=opt_size,
+                        batch_size=batch_size)
+
+                else:
+                    X_train, Y_train=stack_multi_seq(
+                        chunk=keys[i:i+batch_size],
+                        multi_opt_size=opt_size,
+                        batch_size=batch_size)
 
             Y_train = np_utils.to_categorical(Y_train,classes)
             if train == 'test':
@@ -222,6 +242,35 @@ def stack_multi_stream(chunk,multi_opt_size,batch_size):
         returns.append(np.array(stack_return[i]))
 
     return returns, labels
+
+def stack_seq_rgb(path_video):
+    return_stack = []
+    for i in range(3):
+        rgb = cv2.imread(data_folder_seq + path_video + '/rgb-' + str(i) + '.jpg')
+        rgb = rgb.astype('float16',copy=False)
+        rgb/=255
+        return_stack.append(rgb)
+    return np.array(return_stack)
+
+def stack_single_seq(chunk,opt_size,batch_size):
+    labels = []
+    stack_return = []
+    if opt_size[0] == 0:
+        for rgb in chunk:
+            labels.append(rgb[2])
+            stack_return.append(stack_seq_rgb(rgb[0]))
+    else:
+        data_folder_opt = r'{}opt{}/'.format(data_output_path,opt_size[0])
+        for opt in chunk:
+            labels.append(opt[2])
+            start_opt = opt[1]
+            stack_return.append(stack_optical_flow(opt,start_opt,data_folder_opt))
+
+    if len(stack_return) < len(chunk):
+        print 'Stacked data error'
+        sys.exit()
+
+    return (np.array(stack_return), labels)
 
 def convert_weights(weights, depth, size=3, ins=32):
     mat = weights[0]
