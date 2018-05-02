@@ -177,6 +177,7 @@ with open(text_file) as f:
             pos_render = []
             # print 'Duration video {} frame(s)'.format(length)
             if (length > 30):
+                continue
                 pos_render = [0, length/2-10, length-21]
                 for k in range(len(pos_render)):
                     rgb_pos = 10
@@ -190,7 +191,7 @@ with open(text_file) as f:
 
             elif (length >= 10) & (length <= 30):
                 pos_render = [0]
-                rgb_render = [length/2, length-1]
+                rgb_render = [0, length/2, length-1]
                 i = -1
                 os.chdir(path + name_video)
                 while(True):
@@ -242,6 +243,7 @@ with open(text_file) as f:
             v += 1
             
         else:
+            continue
             pos_render = []
 
             divide = length / num_seq
@@ -359,5 +361,5 @@ with open(text_file) as f:
 print 'Generate {} samples for {} dataset'.format(len(data),train)
 
 # Ghi du lieu dia chi ra file
-with open(out_file,'wb') as f2:
-    pickle.dump(data,f2)
+# with open(out_file,'wb') as f2:
+#     pickle.dump(data,f2)
