@@ -321,6 +321,34 @@ def stack_single_seq(chunk,opt_size,batch_size):
 
     return (np.array(stack_return), labels)
 
+def stack_multi_seq(chunk,multi_opt_size,batch_size):
+    labels = []
+    returns = []
+    stack_return = []
+
+    for opt_size in multi_opt_size:
+        stack_return.append([])
+
+    for sample in chunk:
+        labels.append(sample[2])
+
+        s = 0
+        for opt_size in multi_opt_size:
+            if opt_size == 0:
+                stack_return[s].append(stack_seq_rgb(sample[0]))
+            else:
+                stack_return[s].append(stack_seq_optical_flow(sample[0],sample[1],opt_size))
+            s+=1
+
+    if len(stack_return[0]) < len(chunk):
+        print 'Stacked data error'
+        sys.exit()
+
+    for i in range(len(multi_opt_size)):
+        returns.append(np.array(stack_return[i]))
+
+    return returns, labels
+
 def convert_weights(weights, depth, size=3, ins=32):
     mat = weights[0]
     mat2 = np.empty([size,size,depth,ins])
