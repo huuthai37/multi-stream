@@ -280,7 +280,7 @@ def stack_seq_optical_flow(path_video,render_opt,opt_size):
             return_data.append(nstack)
     else:
         for i in range(20):
-            img = cv2.imread(data_folder_seq + path_video + '/opt' + str(opt_size) + '-' + str(i) + '.jpg', 0)
+            img = cv2.imread(data_folder_seq + path_video + '/opt1-' + str(i) + '.jpg', 0)
             if img is None:
                 print 'Error render optical flow'
                 sys.exit()
