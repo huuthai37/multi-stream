@@ -161,7 +161,7 @@ inst2.setUseSpatialPropagation(True)
 xy = 0
 with open(text_file) as f:
     for line in f:
-        if xy <= 500:
+        if xy <= 570:
             debug = True
         else:
             debug = False
@@ -279,6 +279,7 @@ with open(text_file) as f:
                 if i not in pos_render:
                     ret, frame = cap.read()
                     if not ret:
+                        print('Break,' i)
                         break
                     i += 1
 
@@ -356,6 +357,7 @@ with open(text_file) as f:
 
                         ret, frame = cap.read()
                         if not ret:
+                            print('Break,' i)
                             break
                         i += 1
                         m += 1
