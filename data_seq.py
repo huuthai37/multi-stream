@@ -122,6 +122,11 @@ text_file = r'data/{}list.txt'.format(train)
 out_file_folder = r'{}database/'.format(output_path)
 out_file = r'{}{}-seq{}.pickle'.format(out_file_folder,train,num_seq)
 
+if (len(sys.argv)) >= 5:
+    split = sys.argv[4]
+    text_file = r'data/{}list0{}.txt'.format(train,split)
+    out_file = r'{}{}{}-seq{}.pickle'.format(out_file_folder,train,split,num_seq)
+
 # Tao folder chinh
 if not os.path.isdir(data_output_folder):
     os.makedirs(data_output_folder) # tao data_output_folder/
@@ -176,7 +181,7 @@ with open(text_file) as f:
         if (length <= 60):
             pos_render = []
             # print 'Duration video {} frame(s)'.format(length)
-            if (length > 30):
+            if (length > 20):
                 pos_render = [0, length/2-10, length-21]
                 for k in range(len(pos_render)):
                     rgb_pos = 10
@@ -188,7 +193,7 @@ with open(text_file) as f:
                     render_image(pos_render[k], cap, path + name_video, rgb_pos, k)
                     cap.release()
 
-            elif (length >= 10) & (length <= 30):
+            elif (length >= 10) & (length <= 20):
                 pos_render = [0]
                 rgb_render = [0, length/2, length-1]
                 i = -1
