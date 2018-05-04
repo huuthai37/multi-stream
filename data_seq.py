@@ -289,16 +289,16 @@ with open(text_file) as f:
                                 prvs1 = next1
 
                                 # Chuan hoa gia tri diem anh ve tu 0 den 255
-                                horz = cv2.normalize(flow[...,0], None, 0, 255, cv2.NORM_MINMAX)
-                                vert = cv2.normalize(flow[...,1], None, 0, 255, cv2.NORM_MINMAX)
+                                horz1 = cv2.normalize(flow[...,0], None, 0, 255, cv2.NORM_MINMAX)
+                                vert1 = cv2.normalize(flow[...,1], None, 0, 255, cv2.NORM_MINMAX)
 
                                 # Chuyen kieu ve int8
-                                horz = horz.astype('uint8')
-                                vert = vert.astype('uint8')
+                                horz1 = horz1.astype('uint8')
+                                vert1 = vert1.astype('uint8')
 
                                 # Ghi anh
-                                cv2.imwrite('opt1-'+str(2*k1)+'.jpg',horz,[int(cv2.IMWRITE_JPEG_QUALITY), 90])
-                                cv2.imwrite('opt1-'+str(2*k1+1)+'.jpg',vert,[int(cv2.IMWRITE_JPEG_QUALITY), 90])
+                                cv2.imwrite('opt1-'+str(2*k1)+'.jpg',horz1,[int(cv2.IMWRITE_JPEG_QUALITY), 90])
+                                cv2.imwrite('opt1-'+str(2*k1+1)+'.jpg',vert1,[int(cv2.IMWRITE_JPEG_QUALITY), 90])
 
                             k1 += 1
                         # Tao optical flow lay mau 2
@@ -313,16 +313,16 @@ with open(text_file) as f:
                                 prvs2 = next2
 
                                 # Chuan hoa gia tri diem anh ve tu 0 den 255
-                                horz = cv2.normalize(flow[...,0], None, 0, 255, cv2.NORM_MINMAX)
-                                vert = cv2.normalize(flow[...,1], None, 0, 255, cv2.NORM_MINMAX)
+                                horz2 = cv2.normalize(flow[...,0], None, 0, 255, cv2.NORM_MINMAX)
+                                vert2 = cv2.normalize(flow[...,1], None, 0, 255, cv2.NORM_MINMAX)
 
                                 # Chuyen kieu ve int8
-                                horz = horz.astype('uint8')
-                                vert = vert.astype('uint8')
+                                horz2 = horz2.astype('uint8')
+                                vert2 = vert2.astype('uint8')
 
                                 # Ghi anh
-                                cv2.imwrite('opt2-'+str(2*k2)+'.jpg',horz,[int(cv2.IMWRITE_JPEG_QUALITY), 90])
-                                cv2.imwrite('opt2-'+str(2*k2+1)+'.jpg',vert,[int(cv2.IMWRITE_JPEG_QUALITY), 90])
+                                cv2.imwrite('opt2-'+str(2*k2)+'.jpg',horz2,[int(cv2.IMWRITE_JPEG_QUALITY), 90])
+                                cv2.imwrite('opt2-'+str(2*k2+1)+'.jpg',vert2,[int(cv2.IMWRITE_JPEG_QUALITY), 90])
 
                             k2 += 1
                         
@@ -353,6 +353,7 @@ with open(text_file) as f:
                 data.append([folder_video + '/' + name_video, pos_render, video_class, group])
             else:
                 print (k1, k2, k3, name_video)
+                sys.exit()
 
         if (count % 100 == 0):
             print r'Created {} samples'.format(count)
