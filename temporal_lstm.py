@@ -67,10 +67,10 @@ if not cross_validation:
         out_file = r'{}database/test-seq{}.pickle'.format(data_output_path,seq_len)
 else:
     if train:
-        out_file = r'{}database/train{}-seq{}.pickle'.format(data_output_path,cross_index,sample_rate)
-        valid_file = r'{}database/test{}-seq{}.pickle'.format(data_output_path,cross_index,sample_rate)
+        out_file = r'{}database/train{}-seq{}.pickle'.format(data_output_path,cross_index,seq_len)
+        valid_file = r'{}database/test{}-seq{}.pickle'.format(data_output_path,cross_index,seq_len)
     else:
-        out_file = r'{}database/test{}-seq{}.pickle'.format(data_output_path,cross_index,sample_rate)
+        out_file = r'{}database/test{}-seq{}.pickle'.format(data_output_path,cross_index,seq_len)
 
 # MobileNet model
 if train & (not retrain):
