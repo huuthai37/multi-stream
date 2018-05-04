@@ -261,14 +261,11 @@ with open(text_file) as f:
         else:
             pos_render = []
 
-            divide = length / num_seq
+            divide = (length - 1) / num_seq
             # print(length, divide)
 
             for i in range(num_seq):
-                if i < num_seq - 1:
-                    k = np.random.randint(divide*i,divide*(i+1)-19)
-                else:
-                    k = np.random.randint(divide*i,length-20)
+                k = np.random.randint(divide*i,divide*(i+1)-19)
                 pos_render.append(k)
 
             v += 1
@@ -279,7 +276,7 @@ with open(text_file) as f:
                 if i not in pos_render:
                     ret, frame = cap.read()
                     if not ret:
-                        print('Break', i)
+                        # print('Break', i)
                         break
                     i += 1
 
@@ -357,7 +354,7 @@ with open(text_file) as f:
 
                         ret, frame = cap.read()
                         if not ret:
-                            print('Break', i)
+                            # print('Break', i)
                             break
                         i += 1
                         m += 1
