@@ -276,7 +276,7 @@ with open(text_file) as f:
                 if i not in pos_render:
                     ret, frame = cap.read()
                     if not ret:
-                        # print('Break', i)
+                        print('Break', i)
                         break
                     i += 1
 
@@ -354,7 +354,7 @@ with open(text_file) as f:
 
                         ret, frame = cap.read()
                         if not ret:
-                            # print('Break', i)
+                            print('Break', i)
                             break
                         i += 1
                         m += 1
