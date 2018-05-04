@@ -16,6 +16,18 @@ if sys.argv[3] == 'run':
 else:
     debug = True
 
+def count_frames(path):
+    cap = cv2.VideoCapture(path)
+    i = 0
+    while(True):
+        # Capture frame-by-frame
+        ret, frame = cap.read()
+        if not ret:
+            break  
+        i += 1
+    cap.release()
+    return i
+
 def render_image(pos_render, cap, path_video, rgb_pos, index):
     os.chdir(path_video)
     i = -1
@@ -188,8 +200,9 @@ with open(text_file) as f:
         if not os.path.isdir(path + name_video):
             os.makedirs(path + name_video) #tao data-output/foldet/name/
 
+        length = count_frames(data_input_folder + arr_line)
         cap = cv2.VideoCapture(data_input_folder + arr_line)
-        length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        
         if (length <= 60):
             pos_render = []
             # print 'Duration video {} frame(s)'.format(length)
@@ -261,11 +274,14 @@ with open(text_file) as f:
         else:
             pos_render = []
 
-            divide = (length - 1) / num_seq
+            divide = length / num_seq
             # print(length, divide)
 
             for i in range(num_seq):
-                k = np.random.randint(divide*i,divide*(i+1)-19)
+                if i < num_seq - 1:
+                    k = np.random.randint(divide*i,divide*(i+1)-19)
+                else:
+                    k = np.random.randint(divide*i,length-20)
                 pos_render.append(k)
 
             v += 1
@@ -276,7 +292,6 @@ with open(text_file) as f:
                 if i not in pos_render:
                     ret, frame = cap.read()
                     if not ret:
-                        print('Break', i)
                         break
                     i += 1
 
@@ -354,7 +369,6 @@ with open(text_file) as f:
 
                         ret, frame = cap.read()
                         if not ret:
-                            print('Break', i)
                             break
                         i += 1
                         m += 1
