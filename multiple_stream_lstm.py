@@ -73,7 +73,11 @@ if not cross_validation:
     else:
         out_file = r'{}database/test-seq3.pickle'.format(data_output_path)
 else:
-    out_file = r'{}database/cross-seq3.pickle'.format(data_output_path)
+    if train:
+        out_file = r'{}database/train{}-seq{}.pickle'.format(data_output_path,cross_index,sample_rate)
+        valid_file = r'{}database/test{}-seq{}.pickle'.format(data_output_path,cross_index,sample_rate)
+    else:
+        out_file = r'{}database/test{}-seq{}.pickle'.format(data_output_path,cross_index,sample_rate)
 
 inputs = []
 outputs = []
@@ -246,17 +250,6 @@ else:
     with open('results/multiple-lstm{}-{}-cr{}.txt'.format(opt_size,fusion,cross_index), 'w+') as fw1:
         fw1.write(classification_report(Y_test, y_classes, digits=6))
         fw1.write('\nRun time: ' + str(run_time))
-
-    if server:
-        print 'Score per video'
-        print(gd.getScorePerVideo(y_pred, keys))
-        with open('results/multiple-lstm{}-{}-v-cr{}.txt'.format(opt_size,fusion,cross_index), 'w+') as fw2:
-            fw2.write(gd.getScorePerVideo(y_pred, keys))
-    else:
-        print 'Score per video'
-        print(gd.getScorePerVideo(y_pred, keys[0:10*batch_size]))
-        with open('results/multiple-lstm{}-{}-v-cr{}.txt'.format(opt_size,fusion,cross_index), 'w+') as fw2:
-            fw2.write(gd.getScorePerVideo(y_pred, keys[0:10*batch_size]))
 
     print 'Confusion matrix'
     print(confusion_matrix(Y_test, y_classes))
