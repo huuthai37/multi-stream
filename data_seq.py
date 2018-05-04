@@ -152,6 +152,12 @@ with open(class_file) as f0:
 inst = cv2.optflow.createOptFlow_DIS(cv2.optflow.DISOPTICAL_FLOW_PRESET_MEDIUM)
 inst.setUseSpatialPropagation(True)
 
+inst1 = cv2.optflow.createOptFlow_DIS(cv2.optflow.DISOPTICAL_FLOW_PRESET_MEDIUM)
+inst1.setUseSpatialPropagation(True)
+
+inst2 = cv2.optflow.createOptFlow_DIS(cv2.optflow.DISOPTICAL_FLOW_PRESET_MEDIUM)
+inst2.setUseSpatialPropagation(True)
+
 with open(text_file) as f:
     for line in f:
         # Tao duong dan va ten file anh
@@ -285,7 +291,7 @@ with open(text_file) as f:
                         if (m > 5) & (m <= 15):
                             if not debug:
                                 next1 = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
-                                flow = inst.calc(prvs1, next1, None)
+                                flow = inst1.calc(prvs1, next1, None)
                                 prvs1 = next1
 
                                 # Chuan hoa gia tri diem anh ve tu 0 den 255
@@ -308,7 +314,7 @@ with open(text_file) as f:
                         if (m%2 == 0) & (m != 0):
                             if not debug:
                                 next2 = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
-                                flow = inst.calc(prvs2, next2, None)
+                                flow = inst2.calc(prvs2, next2, None)
                         
                                 prvs2 = next2
 
@@ -353,6 +359,8 @@ with open(text_file) as f:
                 data.append([folder_video + '/' + name_video, pos_render, video_class, group])
             else:
                 print (k1, k2, k3, name_video)
+                print pos_render
+                print length
                 sys.exit()
 
         if (count % 100 == 0):
