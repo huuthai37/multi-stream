@@ -173,11 +173,11 @@ inst2.setUseSpatialPropagation(True)
 xy = 0
 with open(text_file) as f:
     for line in f:
-        if xy <= 570:
-            debug = True
-        else:
-            debug = False
-        xy += 1
+        # if xy <= 570:
+        #     debug = True
+        # else:
+        #     debug = False
+        # xy += 1
         # Tao duong dan va ten file anh
         arr_line = line.rstrip().split(' ')[0] # return folder/subfolder/name.mpg
 
