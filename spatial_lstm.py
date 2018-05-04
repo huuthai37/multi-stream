@@ -206,17 +206,6 @@ else:
         fw1.write(classification_report(Y_test, y_classes, digits=6))
         fw1.write('\nRun time: ' + str(run_time))
 
-    if server:
-        print 'Score per video'
-        print(gd.getScorePerVideo(y_pred, keys))
-        with open('results/spatial-lstm-cr{}-v.txt'.format(cross_index), 'w+') as fw2:
-            fw2.write(gd.getScorePerVideo(y_pred, keys))
-    else:
-        print 'Score per video'
-        print(gd.getScorePerVideo(y_pred, keys[0:10*batch_size]))
-        with open('results/spatial-lstm-cr{}-v.txt'.format(cross_index), 'w+') as fw2:
-            fw2.write(gd.getScorePerVideo(y_pred, keys[0:10*batch_size]))
-
     print 'Confusion matrix'
     print confusion_matrix(Y_test, y_classes)
     with open('results/spatial-lstm-cr{}-cf.txt'.format(cross_index),'wb') as fw3:
