@@ -17,6 +17,10 @@ data_output_folder = r'{}seq{}/'.format(output_path,num_seq)
 out_file_folder = r'{}database/'.format(output_path)
 out_file = r'{}{}-seq{}.pickle'.format(out_file_folder,train,num_seq)
 
+if (len(sys.argv)) >= 4:
+    split = sys.argv[3]
+    out_file = r'{}{}{}-seq{}.pickle'.format(out_file_folder,train,split,num_seq)
+
 with open(out_file,'rb') as f1:
     keys = pickle.load(f1)
 

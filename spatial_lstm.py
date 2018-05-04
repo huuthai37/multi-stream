@@ -29,7 +29,7 @@ if process[0] == 'train':
 elif process[0] == 'retrain':
     if len(sys.argv) < 7:
         print 'Missing agrument'
-        print r'Ex: spatial_stream.py retrain {batch} {classes} {epochs} {sample rate} {old epochs}'
+        print r'Ex: spatial_stream.py retrain {batch} {classes} {epochs} {sequence length} {old epochs}'
         sys.exit()
     train = True
     retrain = True
@@ -61,7 +61,11 @@ if not cross_validation:
     else:
         out_file = r'{}database/test-seq{}.pickle'.format(data_output_path,sample_rate)
 else:
-    out_file = r'{}database/cross-seq{}.pickle'.format(data_output_path,sample_rate)
+    if train:
+        out_file = r'{}database/train{}-seq{}.pickle'.format(data_output_path,cross_index,sample_rate)
+        valid_file = r'{}database/test{}-seq{}.pickle'.format(data_output_path,cross_index,sample_rate)
+    else:
+        out_file = r'{}database/test{}-seq{}.pickle'.format(data_output_path,cross_index,sample_rate)
 
 # MobileNet model
 if train & (not retrain):
