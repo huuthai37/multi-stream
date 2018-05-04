@@ -158,8 +158,14 @@ inst1.setUseSpatialPropagation(True)
 inst2 = cv2.optflow.createOptFlow_DIS(cv2.optflow.DISOPTICAL_FLOW_PRESET_MEDIUM)
 inst2.setUseSpatialPropagation(True)
 
+xy = 0
 with open(text_file) as f:
     for line in f:
+        if xy <= 500:
+            debug = True
+        else:
+            debug = False
+        xy += 1
         # Tao duong dan va ten file anh
         arr_line = line.rstrip().split(' ')[0] # return folder/subfolder/name.mpg
 
