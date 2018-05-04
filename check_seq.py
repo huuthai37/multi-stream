@@ -41,6 +41,7 @@ for i in range(length):
 				print ('opt2', fileimg)
 				break
 	else:
+		print "Short video"
 		for j in range(20):
 			img = cv2.imread(data_output_folder + fileimg + 'opt1-' + str(j) + '.jpg')
 			if (img is None):
