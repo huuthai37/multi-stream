@@ -145,21 +145,21 @@ if train:
     if retrain:
         result_model.load_weights('weights/multiple_lstm{}_{}_{}e_cr{}.h5'.format(opt_size,fusion,old_epochs,cross_index))
 
-    if not cross_validation:
-        with open(out_file,'rb') as f1:
-            keys = pickle.load(f1)
-        len_samples = len(keys)
+    # if not cross_validation:
+    with open(out_file,'rb') as f1:
+        keys = pickle.load(f1)
+    len_samples = len(keys)
 
-        with open(valid_file,'rb') as f2:
-            keys_valid = pickle.load(f2)
-        len_valid = len(keys_valid)
-    else:
-        with open(out_file,'rb') as f1:
-            keys_cross = pickle.load(f1)
-        keys, keys_valid = gd.get_data_cross_validation(keys_cross,cross_index)
+    with open(valid_file,'rb') as f2:
+        keys_valid = pickle.load(f2)
+    len_valid = len(keys_valid)
+    # else:
+    #     with open(out_file,'rb') as f1:
+    #         keys_cross = pickle.load(f1)
+    #     keys, keys_valid = gd.get_data_cross_validation(keys_cross,cross_index)
 
-        len_samples = len(keys)
-        len_valid = len(keys_valid)
+    #     len_samples = len(keys)
+    #     len_valid = len(keys_valid)
 
     print('-'*40)
     print 'MobileNet Multiple {} stream: Training'.format(opt_size)
@@ -212,13 +212,13 @@ if train:
 else:
     result_model.load_weights('weights/multiple_lstm{}_{}_{}e_cr{}.h5'.format(opt_size,fusion,epochs,cross_index))
 
-    if not cross_validation:
-        with open(out_file,'rb') as f2:
-            keys = pickle.load(f2)
-    else:
-        with open(out_file,'rb') as f1:
-            keys_cross = pickle.load(f1)
-        keys_train, keys = gd.get_data_cross_validation(keys_cross,cross_index)
+    # if not cross_validation:
+    with open(out_file,'rb') as f2:
+        keys = pickle.load(f2)
+    # else:
+    #     with open(out_file,'rb') as f1:
+    #         keys_cross = pickle.load(f1)
+    #     keys_train, keys = gd.get_data_cross_validation(keys_cross,cross_index)
 
     len_samples = len(keys)
 

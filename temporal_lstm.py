@@ -171,13 +171,13 @@ if train:
 else:
     result_model.load_weights('weights/temporal_lstm{}_{}e_cr{}.h5'.format(opt_size,epochs,cross_index))
 
-    if not cross_validation:
-        with open(out_file,'rb') as f2:
-            keys = pickle.load(f2)
-    else:
-        with open(out_file,'rb') as f1:
-            keys_cross = pickle.load(f1)
-        keys_train, keys = gd.get_data_cross_validation(keys_cross,cross_index)
+    # if not cross_validation:
+    with open(out_file,'rb') as f2:
+        keys = pickle.load(f2)
+    # else:
+    #     with open(out_file,'rb') as f1:
+    #         keys_cross = pickle.load(f1)
+    #     keys_train, keys = gd.get_data_cross_validation(keys_cross,cross_index)
 
     len_samples = len(keys)
 
