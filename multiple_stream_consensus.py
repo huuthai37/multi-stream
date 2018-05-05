@@ -121,7 +121,7 @@ for i in range(len(multi_opt_size)):
 # Fusion
 z = Concatenate(axis=1)(outputs)
 z = Reshape((n_neurons,len(multi_opt_size)))(z)
-z = Conv1D(filters=1,kernel_size=1,use_bias=False)(z)
+z = Conv1D(filters=1,kernel_size=1,use_bias=True)(z)
 z = Flatten()(z)
 z = Dropout(0.5)(z)
 z = Dense(classes)(z)
