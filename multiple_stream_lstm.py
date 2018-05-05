@@ -74,10 +74,10 @@ if not cross_validation:
         out_file = r'{}database/test-seq3.pickle'.format(data_output_path)
 else:
     if train:
-        out_file = r'{}database/train{}-seq{}.pickle'.format(data_output_path,cross_index,sample_rate)
-        valid_file = r'{}database/test{}-seq{}.pickle'.format(data_output_path,cross_index,sample_rate)
+        out_file = r'{}database/train{}-seq{}.pickle'.format(data_output_path,cross_index,3)
+        valid_file = r'{}database/test{}-seq{}.pickle'.format(data_output_path,cross_index,3)
     else:
-        out_file = r'{}database/test{}-seq{}.pickle'.format(data_output_path,cross_index,sample_rate)
+        out_file = r'{}database/test{}-seq{}.pickle'.format(data_output_path,cross_index,3)
 
 inputs = []
 outputs = []
