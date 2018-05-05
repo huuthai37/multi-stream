@@ -120,7 +120,7 @@ for i in range(len(multi_opt_size)):
 
 # Fusion
 z = Concatenate(axis=1)(outputs)
-z = Reshape((128,len(multi_opt_size)))(z)
+z = Reshape((n_neurons,len(multi_opt_size)))(z)
 z = Conv1D(filters=1,kernel_size=1,use_bias=False)(z)
 z = Flatten()(z)
 z = Dropout(0.5)(z)
@@ -128,112 +128,112 @@ z = Dense(classes)(z)
 
 # Final touch
 result_model = Model(inputs=inputs, outputs=z)
-result_model.summary()
+# result_model.summary()
 # Run
-# result_model.compile(loss='categorical_crossentropy',
-#               optimizer=optimizers.SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True),
-#               metrics=['accuracy'])
+result_model.compile(loss='categorical_crossentropy',
+              optimizer=optimizers.SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True),
+              metrics=['accuracy'])
 
-# if train:
-#     if retrain:
-#         result_model.load_weights('weights/multiple_consensus{}_{}_{}e_cr{}.h5'.format(opt_size,fusion,old_epochs,cross_index))
+if train:
+    if retrain:
+        result_model.load_weights('weights/multiple_consensus{}_{}_{}e_cr{}.h5'.format(opt_size,fusion,old_epochs,cross_index))
 
-#     with open(out_file,'rb') as f1:
-#         keys = pickle.load(f1)
-#     len_samples = len(keys)
+    with open(out_file,'rb') as f1:
+        keys = pickle.load(f1)
+    len_samples = len(keys)
 
-#     with open(valid_file,'rb') as f2:
-#         keys_valid = pickle.load(f2)
-#     len_valid = len(keys_valid)
+    with open(valid_file,'rb') as f2:
+        keys_valid = pickle.load(f2)
+    len_valid = len(keys_valid)
 
-#     print('-'*40)
-#     print 'MobileNet Multiple {} stream: Training'.format(opt_size)
-#     print 'Number samples: {}'.format(len_samples)
-#     print 'Number valid: {}'.format(len_valid)
-#     print('-'*40)
+    print('-'*40)
+    print 'MobileNet Multiple {} stream: Training'.format(opt_size)
+    print 'Number samples: {}'.format(len_samples)
+    print 'Number valid: {}'.format(len_valid)
+    print('-'*40)
 
-#     histories = []
-#     if server:
-#         steps = len_samples/batch_size
-#         validation_steps = int(np.ceil(len_valid*1.0/batch_size))
-#     else:
-#         steps = 5
-#         validation_steps = 5
+    histories = []
+    if server:
+        steps = len_samples/batch_size
+        validation_steps = int(np.ceil(len_valid*1.0/batch_size))
+    else:
+        steps = 5
+        validation_steps = 5
     
-#     for e in range(epochs):
-#         print('Epoch', e+1)
-#         print('-'*40)
+    for e in range(epochs):
+        print('Epoch', e+1)
+        print('-'*40)
 
-#         if server:
-#             random.shuffle(keys)
+        if server:
+            random.shuffle(keys)
 
-#         time_start = time.time()
+        time_start = time.time()
 
-#         history = result_model.fit_generator(
-#             gd.getTrainData(
-#                 keys=keys,batch_size=batch_size,classes=classes,mode=3,train='train',opt_size=multi_opt_size,seq=True), 
-#             verbose=1, 
-#             max_queue_size=3, 
-#             steps_per_epoch=steps, 
-#             epochs=1,
-#             validation_data=gd.getTrainData(
-#                 keys=keys_valid,batch_size=batch_size,classes=classes,mode=3,train='test',opt_size=multi_opt_size,seq=True),
-#             validation_steps=validation_steps
-#         )
-#         run_time = time.time() - time_start
+        history = result_model.fit_generator(
+            gd.getTrainData(
+                keys=keys,batch_size=batch_size,classes=classes,mode=3,train='train',opt_size=multi_opt_size,seq=True), 
+            verbose=1, 
+            max_queue_size=3, 
+            steps_per_epoch=steps, 
+            epochs=1,
+            validation_data=gd.getTrainData(
+                keys=keys_valid,batch_size=batch_size,classes=classes,mode=3,train='test',opt_size=multi_opt_size,seq=True),
+            validation_steps=validation_steps
+        )
+        run_time = time.time() - time_start
 
-#         histories.append([
-#             history.history['acc'],
-#             history.history['val_acc'],
-#             history.history['loss'],
-#             history.history['val_loss'],
-#             run_time
-#         ])
-#         result_model.save_weights('weights/multiple_consensus{}_{}_{}e_cr{}.h5'.format(opt_size,fusion,old_epochs+1+e,cross_index))
+        histories.append([
+            history.history['acc'],
+            history.history['val_acc'],
+            history.history['loss'],
+            history.history['val_loss'],
+            run_time
+        ])
+        result_model.save_weights('weights/multiple_consensus{}_{}_{}e_cr{}.h5'.format(opt_size,fusion,old_epochs+1+e,cross_index))
 
-#         with open('histories/multiple_consensus{}_{}_{}_{}e_cr{}'.format(opt_size,fusion,old_epochs, epochs,cross_index), 'wb') as file_pi:
-#             pickle.dump(histories, file_pi)
+        with open('histories/multiple_consensus{}_{}_{}_{}e_cr{}'.format(opt_size,fusion,old_epochs, epochs,cross_index), 'wb') as file_pi:
+            pickle.dump(histories, file_pi)
 
-# else:
-#     result_model.load_weights('weights/multiple_consensus{}_{}_{}e_cr{}.h5'.format(opt_size,fusion,epochs,cross_index))
+else:
+    result_model.load_weights('weights/multiple_consensus{}_{}_{}e_cr{}.h5'.format(opt_size,fusion,epochs,cross_index))
 
-#     with open(out_file,'rb') as f2:
-#         keys = pickle.load(f2)
+    with open(out_file,'rb') as f2:
+        keys = pickle.load(f2)
 
-#     len_samples = len(keys)
+    len_samples = len(keys)
 
-#     print('-'*40)
-#     print 'MobileNet Multiple {} stream: Testing'.format(opt_size)
-#     print('-'*40)
-#     print 'Number samples: {}'.format(len_samples)
+    print('-'*40)
+    print 'MobileNet Multiple {} stream: Testing'.format(opt_size)
+    print('-'*40)
+    print 'Number samples: {}'.format(len_samples)
 
-#     if server:
-#         Y_test = gd.getClassData(keys)
-#         steps = int(np.ceil(len_samples*1.0/batch_size))
-#     else:
-#         Y_test = gd.getClassData(keys, 10*batch_size)
-#         steps = 10
+    if server:
+        Y_test = gd.getClassData(keys)
+        steps = int(np.ceil(len_samples*1.0/batch_size))
+    else:
+        Y_test = gd.getClassData(keys, 10*batch_size)
+        steps = 10
 
-#     time_start = time.time()
+    time_start = time.time()
 
-#     y_pred = result_model.predict_generator(
-#         gd.getTrainData(
-#             keys=keys,batch_size=batch_size,classes=classes,mode=3,train='test',opt_size=multi_opt_size,seq=True), 
-#         max_queue_size=3, 
-#         steps=steps)
+    y_pred = result_model.predict_generator(
+        gd.getTrainData(
+            keys=keys,batch_size=batch_size,classes=classes,mode=3,train='test',opt_size=multi_opt_size,seq=True), 
+        max_queue_size=3, 
+        steps=steps)
 
-#     run_time = time.time() - time_start
+    run_time = time.time() - time_start
     
-#     y_classes = y_pred.argmax(axis=-1)
-#     print 'Score per samples'
-#     print(classification_report(Y_test, y_classes, digits=6))
-#     with open('results/multiple-consensus{}-{}-cr{}.txt'.format(opt_size,fusion,cross_index), 'w+') as fw1:
-#         fw1.write(classification_report(Y_test, y_classes, digits=6))
-#         fw1.write('\nRun time: ' + str(run_time))
+    y_classes = y_pred.argmax(axis=-1)
+    print 'Score per samples'
+    print(classification_report(Y_test, y_classes, digits=6))
+    with open('results/multiple-consensus{}-{}-cr{}.txt'.format(opt_size,fusion,cross_index), 'w+') as fw1:
+        fw1.write(classification_report(Y_test, y_classes, digits=6))
+        fw1.write('\nRun time: ' + str(run_time))
 
-#     print 'Confusion matrix'
-#     print(confusion_matrix(Y_test, y_classes))
-#     with open('results/multiple-consensus{}-{}-cf-cr{}.txt'.format(opt_size,fusion,cross_index),'wb') as fw3:
-#         pickle.dump(confusion_matrix(Y_test, y_classes),fw3)
+    print 'Confusion matrix'
+    print(confusion_matrix(Y_test, y_classes))
+    with open('results/multiple-consensus{}-{}-cf-cr{}.txt'.format(opt_size,fusion,cross_index),'wb') as fw3:
+        pickle.dump(confusion_matrix(Y_test, y_classes),fw3)
 
-#     print 'Run time: {}'.format(run_time)
+    print 'Run time: {}'.format(run_time)

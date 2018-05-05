@@ -95,7 +95,7 @@ _y = Flatten()(_y)
 _y = Dense(classes)(_y)
 
 result_model = Model(inputs=input_y, outputs=_y)
-result_model.summary()
+# result_model.summary()
 
 # Run
 result_model.compile(loss='categorical_crossentropy',
