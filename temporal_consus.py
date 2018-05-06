@@ -1,10 +1,9 @@
-import keras
 import sys
 import time
 from keras.models import Model, Sequential
 from keras.layers import Dropout, Flatten
 from keras.layers import TimeDistributed, LSTM
-from keras.layers import Input, Dense, AveragePooling1D
+from keras.layers import Input, Dense, AveragePooling1D, Reshape, Average
 import get_data as gd
 from keras import optimizers
 import pickle
@@ -14,6 +13,7 @@ import config
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 import mobilenet
+from loss import consensus_categorical_crossentropy
 
 # temporal_consensus.py [train|retrain|test]{+cross} {batch} {classes} {epochs} {sample rate} {sequence length} {old epochs} {cross index}
 if len(sys.argv) < 6:
@@ -90,16 +90,17 @@ else:
 input_y = Input(shape=(seq_len,224,224,depth))
 _y = TimeDistributed(mobilenet)(input_y)
 _y = AveragePooling1D(pool_size=seq_len)(_y)
-_y = Dropout(0.5)(_y)
 _y = Flatten()(_y)
+_y = Dropout(0.5)(_y)
 _y = Dense(classes)(_y)
 
 result_model = Model(inputs=input_y, outputs=_y)
 # result_model.summary()
 
 # Run
-result_model.compile(loss='categorical_crossentropy',
-              optimizer=optimizers.SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True),
+result_model.compile(loss=consensus_categorical_crossentropy,
+              optimizer=optimizers.SGD(lr=0.005, decay=1e-5, momentum=0.9, nesterov=False),
+              # optimizer=optimizers.SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True),
               metrics=['accuracy'])
 
 if train:
@@ -126,15 +127,19 @@ if train:
         steps = len_samples/batch_size
         validation_steps = int(np.ceil(len_valid*1.0/batch_size))
     else:
-        steps = 5
-        validation_steps = 5
+        steps = len_samples/batch_size
+        validation_steps = int(np.ceil(len_valid*1.0/batch_size))
     
     for e in range(epochs):
         print('Epoch', e+1)
         print('-'*40)
 
-        if server:
-            random.shuffle(keys)
+        random.shuffle(keys)
+
+        if retrain:
+            initial_epoch = old_epochs + e
+        else:
+            initial_epoch = e
 
         time_start = time.time()
 
@@ -142,14 +147,17 @@ if train:
             gd.getTrainData(
                 keys=keys,batch_size=batch_size,classes=classes,mode=1,train='train',opt_size=[opt_size],seq=True), 
             verbose=1, 
-            max_queue_size=3, 
+            max_queue_size=5, 
             steps_per_epoch=steps, 
             epochs=1,
             validation_data=gd.getTrainData(
                 keys=keys_valid,batch_size=batch_size,classes=classes,mode=1,train='test',opt_size=[opt_size],seq=True),
-            validation_steps=validation_steps
+            validation_steps=validation_steps,
+            # initial_epoch=initial_epoch
         )
         run_time = time.time() - time_start
+
+        print history.history
 
         histories.append([
             history.history['acc'],
@@ -180,8 +188,8 @@ else:
         Y_test = gd.getClassData(keys)
         steps = int(np.ceil(len_samples*1.0/batch_size))
     else:
-        Y_test = gd.getClassData(keys, 10*batch_size)
-        steps = 10
+        Y_test = gd.getClassData(keys)
+        steps = int(np.ceil(len_samples*1.0/batch_size))
 
     time_start = time.time()
 
