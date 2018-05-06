@@ -47,12 +47,12 @@ n_neurons = 100
 multi_opt_size = []
 pretrains = []
 arr_opt_size = opt_size.split('_')
-for i in arr_opt_size:
-    if i != '0':
-        optx = arr_opt_size.index(i)
-        multi_opt_size.append(optx)
-        pretrains.append(int(i))
+for i in range(len(arr_opt_size)):
+    if arr_opt_size[i] != '0':
+        multi_opt_size.append(i)
+        pretrains.append(int(arr_opt_size[i]))
 
+print multi_opt_size
 depth = 20
 input_shape = (224,224,depth)
 
@@ -104,7 +104,7 @@ for i in range(len(multi_opt_size)):
         outputs.append(_x)
     else:
         # Temporal
-        input_y = Input(shape=(224,224,20))
+        input_y = Input(shape=(None,224,224,20))
         inputs.append(input_y)
         y = mobilenet.mobilenet_remake(
             name='temporal'+str(opt),

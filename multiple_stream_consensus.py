@@ -1,9 +1,9 @@
-import keras
 import sys
 import time
 from keras.models import Model
 from keras.layers import Dense, Conv1D, Conv2D, Activation, Reshape, Flatten, Input, ZeroPadding2D, Dropout
-from keras.layers import Average, Multiply, Maximum, GlobalAveragePooling2D, Concatenate,TimeDistributed, LSTM
+from keras.layers import Average, Multiply, Maximum, GlobalAveragePooling2D, Concatenate,TimeDistributed, LSTM, AveragePooling1D
+from keras.applications import mobilenet as _mobilenet
 import get_data as gd
 from keras import optimizers
 import pickle
@@ -13,6 +13,7 @@ import config
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 import mobilenet
+from loss import consensus_categorical_crossentropy
 
 # multiple_stream_consensus.py [train|retrain|test]{+cross} {batch} {classes} {epochs} {fusion} [list 4 single epochs] {cross index}
 if len(sys.argv) < 6:
@@ -47,14 +48,14 @@ n_neurons = 128
 multi_opt_size = []
 pretrains = []
 arr_opt_size = opt_size.split('_')
-for i in arr_opt_size:
-    if i != '0':
-        optx = arr_opt_size.index(i)
-        multi_opt_size.append(optx)
-        pretrains.append(int(i))
+for i in range(len(arr_opt_size)):
+    if arr_opt_size[i] != '0':
+        multi_opt_size.append(i)
+        pretrains.append(int(arr_opt_size[i]))
 
 depth = 20
 input_shape = (224,224,depth)
+seq_len = 3
 
 server = config.server()
 data_output_path = config.data_output_path()
@@ -79,60 +80,74 @@ else:
     else:
         out_file = r'{}database/test{}-seq{}.pickle'.format(data_output_path,cross_index,3)
 
-inputs = []
-outputs = []
 if train & (not retrain):
     weights = 'imagenet'
 else:
     weights = None
 
-for i in range(len(multi_opt_size)):
-    opt = multi_opt_size[i]
-    if opt == 0:
-        input_x = Input(shape=(None,224,224,3))
-        inputs.append(input_x)
+input_x = Input(shape=(None,224,224,3))
+x = _mobilenet.MobileNet(
+    input_shape=(224,224,3),
+    pooling='avg',
+    include_top=False,
+    weights=weights,
+    dropout=0.5
+)
+_x = TimeDistributed(x)(input_x)
+_x = LSTM(n_neurons)(_x)
+_x = Reshape((1,n_neurons))(_x)
 
-        x = keras.applications.mobilenet.MobileNet(
-            input_shape=(224,224,3),
-            pooling='avg',
-            include_top=False,
-            weights=weights,
-            dropout=0.5
-        )
-        _x = TimeDistributed(x)(input_x)
-        _x = LSTM(n_neurons)(_x)
-        _x = Reshape((1,n_neurons))(_x)
-        outputs.append(_x)
-    else:
-        # Temporal
-        input_y = Input(shape=(224,224,20))
-        inputs.append(input_y)
-        y = mobilenet.mobilenet_remake(
-            name='temporal'+str(opt),
-            input_shape=(224,224,depth),
-            classes=classes,
-            weight=weights
-        )
-        _y = TimeDistributed(y)(input_y)
-        _y = AveragePooling1D(pool_size=3)(_y)
-        _y = Dense(n_neurons)(_y)
-        outputs.append(_y)
+# Temporal
+input_y = Input(shape=(seq_len,224,224,depth))
+y = mobilenet.mobilenet_remake(
+    name='temporal',
+    input_shape=(224,224,depth),
+    classes=classes,
+    weight=weights
+)
+_y = TimeDistributed(y)(input_y)
+_y = AveragePooling1D(pool_size=seq_len)(_y)
+_y = Dense(n_neurons)(_y)
+
+len_multi_opt_size = len(multi_opt_size)
+if len_multi_opt_size == 3:
+    # Temporal
+    input_y2 = Input(shape=(seq_len,224,224,depth))
+    y2 = mobilenet.mobilenet_remake(
+        name='temporal2',
+        input_shape=(224,224,depth),
+        classes=classes,
+        weight=weights
+    )
+    _y2 = TimeDistributed(y2)(input_y2)
+    _y2 = AveragePooling1D(pool_size=seq_len)(_y2)
+    _y2 = Dense(n_neurons)(_y2)
 
 # Fusion
-z = Concatenate(axis=1)(outputs)
+if len_multi_opt_size == 2:
+    z = Concatenate(axis=1)([_x, _y])
+else:
+    z = Concatenate(axis=1)([_x, _y, _y2])
+
 z = Reshape((n_neurons,len(multi_opt_size)))(z)
 z = Conv1D(filters=1,kernel_size=1,use_bias=True)(z)
 z = Flatten()(z)
 z = Dropout(0.5)(z)
-z = Dense(classes)(z)
+z = Dense(classes, activation='softmax')(z)
 
 # Final touch
-result_model = Model(inputs=inputs, outputs=z)
+if len_multi_opt_size == 2:
+    result_model = Model(inputs=[input_x, input_y], outputs=z)
+else:
+    result_model = Model(inputs=[input_x, input_y, input_y2], outputs=z)
 # result_model.summary()
 # Run
-result_model.compile(loss='categorical_crossentropy',
-              optimizer=optimizers.SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True),
+result_model.compile(loss=consensus_categorical_crossentropy,
+              optimizer=optimizers.SGD(lr=0.005, decay=1e-5, momentum=0.9, nesterov=False),
+              # optimizer=optimizers.SGD(lr=0.005, decay=1e-5, momentum=0.9, nesterov=False),
               metrics=['accuracy'])
+
+print multi_opt_size
 
 if train:
     if retrain:
@@ -164,8 +179,12 @@ if train:
         print('Epoch', e+1)
         print('-'*40)
 
-        if server:
-            random.shuffle(keys)
+        random.shuffle(keys)
+        
+        if retrain:
+            initial_epoch = old_epochs + e
+        else:
+            initial_epoch = e
 
         time_start = time.time()
 
