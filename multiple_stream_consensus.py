@@ -135,7 +135,7 @@ else:
 z = Reshape((n_neurons,len(multi_opt_size)))(z)
 z = Conv1D(filters=1,kernel_size=1,use_bias=True)(z)
 z = Flatten()(z)
-z = Dropout(0.7)(z)
+z = Dropout(0.3)(z)
 z = Dense(classes, activation='softmax')(z)
 
 # Final touch
