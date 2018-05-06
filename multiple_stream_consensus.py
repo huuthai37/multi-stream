@@ -95,7 +95,7 @@ x = _mobilenet.MobileNet(
 )
 _x = TimeDistributed(x)(input_x)
 _x = LSTM(n_neurons)(_x)
-_x = Dropout(0.2)(_x)
+# _x = Dropout(0.2)(_x)
 _x = Reshape((1,n_neurons))(_x)
 
 # Temporal
@@ -108,7 +108,7 @@ y = mobilenet.mobilenet_remake(
 )
 _y = TimeDistributed(y)(input_y)
 _y = AveragePooling1D(pool_size=seq_len)(_y)
-_y = Dropout(0.8)(_y)
+# _y = Dropout(0.8)(_y)
 _y = Dense(n_neurons)(_y)
 
 len_multi_opt_size = len(multi_opt_size)
@@ -123,7 +123,7 @@ if len_multi_opt_size == 3:
     )
     _y2 = TimeDistributed(y2)(input_y2)
     _y2 = AveragePooling1D(pool_size=seq_len)(_y2)
-    _y2 = Dropout(0.8)(_y2)
+#     _y2 = Dropout(0.8)(_y2)
     _y2 = Dense(n_neurons)(_y2)
 
 # Fusion
@@ -135,6 +135,7 @@ else:
 z = Reshape((n_neurons,len(multi_opt_size)))(z)
 z = Conv1D(filters=1,kernel_size=1,use_bias=True)(z)
 z = Flatten()(z)
+z = Dropout(0.7)(z)
 z = Dense(classes, activation='softmax')(z)
 
 # Final touch
@@ -145,7 +146,7 @@ else:
 # result_model.summary()
 # Run
 result_model.compile(loss=consensus_categorical_crossentropy,
-              optimizer=optimizers.SGD(lr=0.005, decay=1e-5, momentum=0.9, nesterov=True),
+              optimizer=optimizers.SGD(lr=0.005, decay=1e-5, momentum=0.9, nesterov=False),
               # optimizer=optimizers.SGD(lr=0.005, decay=1e-5, momentum=0.9, nesterov=False),
               metrics=['accuracy'])
 
