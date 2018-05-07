@@ -257,7 +257,7 @@ else:
     with open('results/multiple-lstm{}-{}-cf-cr{}.txt'.format(opt_size,fusion,cross_index),'wb') as fw3:
         pickle.dump(confusion_matrix(Y_test, y_classes),fw3)
 
-    with open('results/spatial-lstm-cr{}.pickle'.format(cross_index),'wb') as fw3:
+    with open('results/multiple-lstm{}-{}-cr{}.pickle'.format(opt_size,fusion,tcross_index),'wb') as fw3:
         pickle.dump([y_pred, Y_test],fw3)
 
     print 'Run time: {}'.format(run_time)
