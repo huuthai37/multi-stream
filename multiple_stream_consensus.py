@@ -135,7 +135,7 @@ else:
 z = Reshape((n_neurons,len(multi_opt_size)))(z)
 z = Conv1D(filters=1,kernel_size=1,use_bias=True)(z)
 z = Flatten()(z)
-z = Dropout(0.3)(z)
+z = Dropout(0.5)(z)
 z = Dense(classes, activation='softmax')(z)
 
 # Final touch
@@ -195,7 +195,7 @@ if train:
             gd.getTrainData(
                 keys=keys,batch_size=batch_size,classes=classes,mode=3,train='train',opt_size=multi_opt_size,seq=True), 
             verbose=1, 
-            max_queue_size=3, 
+            max_queue_size=10, 
             steps_per_epoch=steps, 
             epochs=1,
             validation_data=gd.getTrainData(
