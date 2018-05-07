@@ -100,7 +100,7 @@ result_model = Model(inputs=input_x, outputs=_x)
 # Run
 result_model.compile(loss=consensus_categorical_crossentropy,
               # optimizer=optimizers.Adam(lr=5e-5, decay=1e-7),
-              optimizer=optimizers.SGD(lr=0.0005, decay=1e-6, momentum=0.9, nesterov=False),
+              optimizer=optimizers.SGD(lr=0.0001, decay=1e-6, momentum=0.9, nesterov=False),
               metrics=['accuracy'])
 
 if train:
