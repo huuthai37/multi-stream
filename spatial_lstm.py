@@ -43,7 +43,7 @@ batch_size = int(sys.argv[2])
 classes = int(sys.argv[3])
 epochs = int(sys.argv[4])
 sample_rate = int(sys.argv[5])
-n_neurons = 100
+n_neurons = 128
 
 server = config.server()
 data_output_path = config.data_output_path()
