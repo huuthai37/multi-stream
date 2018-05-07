@@ -8,6 +8,7 @@ from keras.layers import TimeDistributed
 from keras.layers import LSTM
 import get_data as gd
 from keras import optimizers
+from keras import losses
 import pickle
 import random
 import numpy as np
@@ -210,5 +211,8 @@ else:
     print confusion_matrix(Y_test, y_classes)
     with open('results/spatial-lstm-cr{}-cf.txt'.format(cross_index),'wb') as fw3:
         pickle.dump(confusion_matrix(Y_test, y_classes),fw3)
+
+    with open('results/spatial-lstm-cr{}.pickle'.format(cross_index),'wb') as fw3:
+        pickle.dump([y_pred, Y_test],fw3)
 
     print 'Run time: {}'.format(run_time)
