@@ -259,7 +259,7 @@ def stack_seq_optical_flow(path_video,render_opt,opt_size):
     return_data = []
     if len(render_opt) == 3:
         for k in range(3):
-            for i in range(k*20, k*20 + 20):
+            for i in range(k*20 + 5, k*20 + 15):
                 img = cv2.imread(data_folder_seq + path_video + '/opt' + str(opt_size) + '-' + str(i) + '.jpg', 0)
                 if img is None:
                     print 'Error render optical flow'
@@ -279,7 +279,7 @@ def stack_seq_optical_flow(path_video,render_opt,opt_size):
             arrays = []
             return_data.append(nstack)
     else:
-        for i in range(20):
+        for i in range(5,15):
             img = cv2.imread(data_folder_seq + path_video + '/opt1-' + str(i) + '.jpg', 0)
             if img is None:
                 print 'Error render optical flow'
@@ -300,7 +300,7 @@ def stack_seq_optical_flow(path_video,render_opt,opt_size):
         return_data.append(nstack)
         return_data.append(nstack)
 
-    return np.array(return_data)
+    return (return_data)
 
 def stack_single_seq(chunk,opt_size,batch_size):
     labels = []
@@ -310,7 +310,6 @@ def stack_single_seq(chunk,opt_size,batch_size):
             labels.append(rgb[2])
             stack_return.append(stack_seq_rgb(rgb[0]))
     else:
-        data_folder_opt = r'{}opt{}/'.format(data_output_path,opt_size[0])
         for opt in chunk:
             labels.append(opt[2])
             stack_return.append(stack_seq_optical_flow(opt[0],opt[1],opt_size[0]))
@@ -319,7 +318,7 @@ def stack_single_seq(chunk,opt_size,batch_size):
         print 'Stacked data error'
         sys.exit()
 
-    return (np.array(stack_return), labels)
+    return np.array(stack_return), labels
 
 def stack_multi_seq(chunk,multi_opt_size,batch_size):
     labels = []
