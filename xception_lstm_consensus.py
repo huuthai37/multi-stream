@@ -16,10 +16,10 @@ import config
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 
-# spatial_lstm_consensus.py [train|retrain|test]{+cross} {batch} {classes} {epochs} {mode} {sequence length} {old epochs} {cross index}
+# xception_lstm_consensus.py [train|retrain|test]{+cross} {batch} {classes} {epochs} {mode} {sequence length} {old epochs} {cross index}
 if len(sys.argv) < 6:
     print 'Missing agrument'
-    print r'Ex: spatial_lstm_consensus.py train {batch} {classes} {epochs} {mode}  {sequence length}'
+    print r'Ex: xception_lstm_consensus.py train {batch} {classes} {epochs} {mode}  {sequence length}'
     sys.exit()
 
 process = sys.argv[1].split('+')
@@ -30,7 +30,7 @@ if process[0] == 'train':
 elif process[0] == 'retrain':
     if len(sys.argv) < 7:
         print 'Missing agrument'
-        print r'Ex: spatial_lstm_consensus.py retrain {batch} {classes} {epochs} {mode} {sequence length} {old epochs}'
+        print r'Ex: xception_lstm_consensus.py retrain {batch} {classes} {epochs} {mode} {sequence length} {old epochs}'
         sys.exit()
     train = True
     retrain = True
@@ -89,9 +89,9 @@ result_model = Sequential()
 result_model.add(TimeDistributed(xception, input_shape=(sample_rate, 224,224,3)))
 result_model.add(LSTM(n_neurons, return_sequences=True))
 if mode == 'avg':
-	result_model.add(AveragePooling1D(pool_size=sample_rate))
+    result_model.add(AveragePooling1D(pool_size=sample_rate))
 elif mode == 'max':
-	result_model.add(MaxPooling1D(pool_size=sample_rate))
+    result_model.add(MaxPooling1D(pool_size=sample_rate))
 result_model.add(Flatten())
 result_model.add(Dropout(0.5))
 result_model.add(Dense(classes, activation='softmax'))
@@ -104,7 +104,7 @@ result_model.compile(loss='categorical_crossentropy',
 
 if train:
     if retrain:
-        result_model.load_weights('weights/spatial_lstmconsensus_{}_{}e_cr{}.h5'.format(mode,old_epochs,cross_index))
+        result_model.load_weights('weights/xception_lstmconsensus_{}_{}e_cr{}.h5'.format(mode,old_epochs,cross_index))
 
     
     with open(out_file,'rb') as f1:
@@ -157,13 +157,13 @@ if train:
             history.history['val_loss'],
             run_time
         ])
-        result_model.save_weights('weights/spatial_lstmconsensus_{}_{}e_cr{}.h5'.format(mode,old_epochs+1+e,cross_index))
+        result_model.save_weights('weights/xception_lstmconsensus_{}_{}e_cr{}.h5'.format(mode,old_epochs+1+e,cross_index))
 
-        with open('histories/spatial_lstmconsensus_{}_{}_{}_{}e_cr{}'.format(mode,sample_rate,old_epochs,epochs,cross_index), 'wb') as file_pi:
+        with open('histories/xception_lstmconsensus_{}_{}_{}_{}e_cr{}'.format(mode,sample_rate,old_epochs,epochs,cross_index), 'wb') as file_pi:
             pickle.dump(histories, file_pi)
 
 else:
-    result_model.load_weights('weights/spatial_lstmconsensus_{}_{}e_cr{}.h5'.format(mode,epochs,cross_index))
+    result_model.load_weights('weights/xception_lstmconsensus_{}_{}e_cr{}.h5'.format(mode,epochs,cross_index))
 
     with open(out_file,'rb') as f2:
         keys = pickle.load(f2)
@@ -195,16 +195,16 @@ else:
     y_classes = y_pred.argmax(axis=-1)
     print 'Score per samples'
     print(classification_report(Y_test, y_classes, digits=6))
-    with open('results/spatial-lstmconsensus-{}-cr{}.txt'.format(mode,cross_index), 'w+') as fw1:
+    with open('results/xception-lstmconsensus-{}-cr{}.txt'.format(mode,cross_index), 'w+') as fw1:
         fw1.write(classification_report(Y_test, y_classes, digits=6))
         fw1.write('\nRun time: ' + str(run_time))
 
     print 'Confusion matrix'
     print confusion_matrix(Y_test, y_classes)
-    with open('results/spatial-lstmconsensus-{}-cr{}-cf.txt'.format(mode,cross_index),'wb') as fw3:
+    with open('results/xception-lstmconsensus-{}-cr{}-cf.txt'.format(mode,cross_index),'wb') as fw3:
         pickle.dump(confusion_matrix(Y_test, y_classes),fw3)
 
-    with open('results/spatial-lstmconsensus-{}-cr{}.pickle'.format(mode,cross_index),'wb') as fw3:
+    with open('results/xception-lstmconsensus-{}-cr{}.pickle'.format(mode,cross_index),'wb') as fw3:
         pickle.dump([y_pred, Y_test],fw3)
 
     print 'Run time: {}'.format(run_time)
