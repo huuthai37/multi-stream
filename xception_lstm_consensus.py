@@ -72,21 +72,21 @@ else:
 # MobileNet model
 if train & (not retrain):
     xception = keras.applications.xception.Xception(
-        input_shape=(224,224,3),
+        input_shape=(299,299,3),
         pooling='avg',
         include_top=False,
         weights='imagenet'
     )
 else:
     xception = keras.applications.xception.Xception(
-        input_shape=(224,224,3),
+        input_shape=(299,299,3),
         pooling='avg',
         include_top=False,
         weights=None
     )
 
 result_model = Sequential()
-result_model.add(TimeDistributed(xception, input_shape=(sample_rate, 224,224,3)))
+result_model.add(TimeDistributed(xception, input_shape=(sample_rate, 299,299,3)))
 result_model.add(LSTM(n_neurons, return_sequences=True))
 if mode == 'avg':
     result_model.add(AveragePooling1D(pool_size=sample_rate))
