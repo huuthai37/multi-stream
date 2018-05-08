@@ -246,8 +246,8 @@ def stack_multi_stream(chunk,multi_opt_size,batch_size):
 def stack_seq_rgb(path_video):
     return_stack = []
     for i in range(3):
-        img = cv2.imread(data_folder_seq + path_video + '/rgb-' + str(i) + '.jpg')
-        rgb = cv2.resize(img, (299, 299))
+        rgb = cv2.imread(data_folder_seq + path_video + '/rgb-' + str(i) + '.jpg')
+#         rgb = cv2.resize(img, (299, 299))
         rgb = rgb.astype('float16',copy=False)
         rgb/=255
         return_stack.append(rgb)
@@ -268,7 +268,7 @@ def stack_seq_optical_flow(path_video,render_opt,opt_size):
                 height, width = img.shape
                 crop_pos = int((width-height)/2)
                 img = img[:,crop_pos:crop_pos+height]
-                resize_img = cv2.resize(img, (299, 299))
+                resize_img = cv2.resize(img, (224, 224))
 
                 resize_img = resize_img.astype('float16',copy=False)
                 resize_img/=255
@@ -288,7 +288,7 @@ def stack_seq_optical_flow(path_video,render_opt,opt_size):
             height, width = img.shape
             crop_pos = int((width-height)/2)
             img = img[:,crop_pos:crop_pos+height]
-            resize_img = cv2.resize(img, (299, 299))
+            resize_img = cv2.resize(img, (224, 224))
 
             resize_img = resize_img.astype('float16',copy=False)
             resize_img/=255
