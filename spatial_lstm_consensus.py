@@ -5,7 +5,7 @@ from keras.models import Model
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers import TimeDistributed
-from keras.layers import LSTM, AveragePooling1D, Reshape
+from keras.layers import LSTM, AveragePooling1D, Reshape, MaxPooling1D
 import get_data as gd
 from keras import optimizers
 from keras import losses
@@ -92,6 +92,8 @@ result_model.add(TimeDistributed(mobilenet, input_shape=(sample_rate, 224,224,3)
 result_model.add(LSTM(n_neurons, return_sequences=True))
 if mode == 'avg':
 	result_model.add(AveragePooling1D(pool_size=sample_rate))
+elif mode == 'max':
+	result_model.add(MaxPooling1D(pool_size=sample_rate))
 result_model.add(Flatten())
 result_model.add(Dropout(0.5))
 result_model.add(Dense(classes, activation='softmax'))
