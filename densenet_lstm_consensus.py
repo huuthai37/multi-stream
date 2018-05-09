@@ -44,7 +44,7 @@ classes = int(sys.argv[3])
 epochs = int(sys.argv[4])
 mode = sys.argv[5]
 sample_rate = int(sys.argv[6])
-n_neurons = 256
+n_neurons = 128
 
 server = config.server()
 data_output_path = config.data_output_path()
