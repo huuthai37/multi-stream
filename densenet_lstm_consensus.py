@@ -143,7 +143,7 @@ if train:
             verbose=1, 
             max_queue_size=5, 
             steps_per_epoch=steps, 
-            epochs=1,
+            epochs=2,
             validation_data=gd.getTrainData(
                 keys=keys_valid,batch_size=batch_size,classes=classes,mode=1,train='test',opt_size=[0],seq=True),
             validation_steps=validation_steps
