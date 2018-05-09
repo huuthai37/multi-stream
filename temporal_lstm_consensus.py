@@ -46,7 +46,7 @@ opt_size = int(sys.argv[5])
 seq_len = int(sys.argv[6])
 n_neurons = 128
 
-depth = 10
+depth = 20
 input_shape = (224,224,depth)
 
 server = config.server()
