@@ -93,7 +93,7 @@ else:
 result_model = Sequential()
 result_model.add(TimeDistributed(mobilenet, input_shape=(seq_len,224,224,depth)))
 result_model.add(LSTM(n_neurons, return_sequences=True))
-result_model.add(AveragePooling1D(pool_size=seq_len))
+# result_model.add(AveragePooling1D(pool_size=seq_len))
 result_model.add(Flatten())
 result_model.add(Dropout(0.5))
 result_model.add(Dense(classes, activation='softmax'))
