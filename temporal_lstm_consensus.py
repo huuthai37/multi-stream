@@ -100,7 +100,7 @@ result_model.add(Dense(classes, activation='softmax'))
 
 # Run
 result_model.compile(loss='categorical_crossentropy',
-              optimizer=optimizers.SGD(lr=1e-4, decay=1e-6, momentum=0.9, nesterov=False),
+              optimizer=optimizers.SGD(lr=5e-4, decay=1e-6, momentum=0.9, nesterov=False),
               metrics=['accuracy'])
 
 if train:
