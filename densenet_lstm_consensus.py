@@ -140,10 +140,10 @@ if train:
         history = result_model.fit_generator(
             gd.getTrainData(
                 keys=keys,batch_size=batch_size,classes=classes,mode=1,train='train',opt_size=[0],seq=True), 
-            verbose=1, 
+            verbose=2, 
             max_queue_size=5, 
             steps_per_epoch=steps, 
-            epochs=2,
+            epochs=1,
             validation_data=gd.getTrainData(
                 keys=keys_valid,batch_size=batch_size,classes=classes,mode=1,train='test',opt_size=[0],seq=True),
             validation_steps=validation_steps
