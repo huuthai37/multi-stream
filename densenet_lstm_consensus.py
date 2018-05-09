@@ -71,14 +71,14 @@ else:
 
 # MobileNet model
 if train & (not retrain):
-    densenet = keras.applications.densenet.Xception(
+    densenet = keras.applications.densenet.DenseNet201(
         input_shape=(224,224,3),
         pooling='avg',
         include_top=False,
         weights='imagenet'
     )
 else:
-    densenet = keras.applications.densenet.Xception(
+    densenet = keras.applications.densenet.DenseNet201(
         input_shape=(224,224,3),
         pooling='avg',
         include_top=False,
