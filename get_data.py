@@ -260,7 +260,7 @@ def stack_seq_optical_flow(path_video,render_opt,opt_size):
     return_data = []
     if len(render_opt) == 3:
         for k in range(3):
-            for i in range(k*20 + 5, k*20 + 15):
+            for i in range(k*20 + 0, k*20 + 20):
                 img = cv2.imread(data_folder_seq + path_video + '/opt' + str(opt_size) + '-' + str(i) + '.jpg', 0)
                 if img is None:
                     print 'Error render optical flow'
@@ -280,7 +280,7 @@ def stack_seq_optical_flow(path_video,render_opt,opt_size):
             arrays = []
             return_data.append(nstack)
     else:
-        for i in range(5,15):
+        for i in range(0,20):
             img = cv2.imread(data_folder_seq + path_video + '/opt1-' + str(i) + '.jpg', 0)
             if img is None:
                 print 'Error render optical flow'
