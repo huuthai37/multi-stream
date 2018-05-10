@@ -85,7 +85,7 @@ if train & (not retrain):
 else:
     weights = None
 
-input_x = Input(shape=(None,224,224,3))
+input_x = Input(shape=(seq_len,224,224,3))
 x = _mobilenet.MobileNet(
     input_shape=(224,224,3),
     pooling='avg',
@@ -94,9 +94,11 @@ x = _mobilenet.MobileNet(
     dropout=0.5
 )
 _x = TimeDistributed(x)(input_x)
-_x = LSTM(n_neurons)(_x)
-# _x = Dropout(0.2)(_x)
-_x = Reshape((1,n_neurons))(_x)
+_x = LSTM(n_neurons, return_sequences=True)(_x)
+_x = Flatten()(_x)
+_x = Dropout(0.5)(_x)
+_x = Dense(classes, activation='softmax')(_x)
+_x = Reshape((classes,1))(_x)
 
 # Temporal
 input_y = Input(shape=(seq_len,224,224,depth))
@@ -107,9 +109,11 @@ y = mobilenet.mobilenet_remake(
     weight=weights
 )
 _y = TimeDistributed(y)(input_y)
-_y = AveragePooling1D(pool_size=seq_len)(_y)
-# _y = Dropout(0.8)(_y)
-_y = Dense(n_neurons)(_y)
+_y = LSTM(n_neurons, return_sequences=True)(_y)
+_y = Flatten()(_y)
+_y = Dropout(0.5)(_y)
+_y = Dense(classes, activation='softmax')(_y)
+_y = Reshape((classes,1))(_y)
 
 len_multi_opt_size = len(multi_opt_size)
 if len_multi_opt_size == 3:
@@ -122,29 +126,29 @@ if len_multi_opt_size == 3:
         weight=weights
     )
     _y2 = TimeDistributed(y2)(input_y2)
-    _y2 = AveragePooling1D(pool_size=seq_len)(_y2)
-#     _y2 = Dropout(0.8)(_y2)
-    _y2 = Dense(n_neurons)(_y2)
+    _y2 = LSTM(n_neurons, return_sequences=True)(_y2)
+    _y2 = Flatten()(_y2)
+    _y2 = Dropout(0.5)(_y2)
+    _y2 = Dense(classes, activation='softmax')(_y2)
+    _y2 = Reshape((classes,1))(_y2)
 
 # Fusion
 if len_multi_opt_size == 2:
-    z = Concatenate(axis=1)([_x, _y])
+    z = Concatenate(axis=2)([_x, _y])
 else:
-    z = Concatenate(axis=1)([_x, _y, _y2])
+    z = Concatenate(axis=2)([_x, _y, _y2])
 
-z = Reshape((n_neurons,len(multi_opt_size)))(z)
-z = Conv1D(filters=1,kernel_size=1,use_bias=True)(z)
+z = Conv1D(filters=1,kernel_size=1,use_bias=False)(z)
 z = Flatten()(z)
-z = Dropout(0.5)(z)
-z = Dense(classes, activation='softmax')(z)
 
 # Final touch
 if len_multi_opt_size == 2:
     result_model = Model(inputs=[input_x, input_y], outputs=z)
 else:
     result_model = Model(inputs=[input_x, input_y, input_y2], outputs=z)
-# result_model.summary()
-# Run
+
+result_model.summary()
+
 result_model.compile(loss=consensus_categorical_crossentropy,
               optimizer=optimizers.SGD(lr=0.005, decay=1e-5, momentum=0.9, nesterov=False),
               # optimizer=optimizers.SGD(lr=0.005, decay=1e-5, momentum=0.9, nesterov=False),
@@ -241,7 +245,7 @@ else:
     y_pred = result_model.predict_generator(
         gd.getTrainData(
             keys=keys,batch_size=batch_size,classes=classes,mode=3,train='test',opt_size=multi_opt_size,seq=True), 
-        max_queue_size=3, 
+        max_queue_size=10, 
         steps=steps)
 
     run_time = time.time() - time_start
