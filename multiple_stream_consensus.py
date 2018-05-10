@@ -147,7 +147,7 @@ if len_multi_opt_size == 2:
 else:
     result_model = Model(inputs=[input_x, input_y, input_y2], outputs=z)
 
-result_model.summary()
+# result_model.summary()
 
 result_model.compile(loss=consensus_categorical_crossentropy,
               optimizer=optimizers.SGD(lr=0.005, decay=1e-5, momentum=0.9, nesterov=False),
@@ -199,7 +199,7 @@ if train:
             gd.getTrainData(
                 keys=keys,batch_size=batch_size,classes=classes,mode=3,train='train',opt_size=multi_opt_size,seq=True), 
             verbose=1, 
-            max_queue_size=10, 
+            max_queue_size=20, 
             steps_per_epoch=steps, 
             epochs=1,
             validation_data=gd.getTrainData(
@@ -245,7 +245,7 @@ else:
     y_pred = result_model.predict_generator(
         gd.getTrainData(
             keys=keys,batch_size=batch_size,classes=classes,mode=3,train='test',opt_size=multi_opt_size,seq=True), 
-        max_queue_size=10, 
+        max_queue_size=20, 
         steps=steps)
 
     run_time = time.time() - time_start
