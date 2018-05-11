@@ -161,7 +161,7 @@ else:
 # result_model.summary()
 
 result_model.compile(loss=consensus_categorical_crossentropy,
-              optimizer=optimizers.SGD(lr=5e-4, decay=1e-7, momentum=0.9, nesterov=False),
+              optimizer=optimizers.SGD(lr=1e-4, decay=1e-7, momentum=0.9, nesterov=False),
               # optimizer=optimizers.SGD(lr=0.005, decay=1e-5, momentum=0.9, nesterov=False),
               metrics=['accuracy'])
 
