@@ -96,9 +96,10 @@ x = _mobilenet.MobileNet(
 _x = TimeDistributed(x)(input_x)
 _x = LSTM(n_neurons, return_sequences=True)(_x)
 _x = Flatten()(_x)
-_x = Dropout(0.5)(_x)
-_x = Dense(classes, activation='softmax')(_x)
-_x = Reshape((classes,1))(_x)
+if fusion == 'score':
+    _x = Dropout(0.5)(_x)
+    _x = Dense(classes, activation='softmax')(_x)
+    _x = Reshape((classes,1))(_x)
 
 # Temporal
 input_y = Input(shape=(seq_len,224,224,depth))
@@ -111,9 +112,10 @@ y = mobilenet.mobilenet_remake(
 _y = TimeDistributed(y)(input_y)
 _y = LSTM(n_neurons, return_sequences=True)(_y)
 _y = Flatten()(_y)
-_y = Dropout(0.5)(_y)
-_y = Dense(classes, activation='softmax')(_y)
-_y = Reshape((classes,1))(_y)
+if fusion == 'score':
+    _y = Dropout(0.5)(_y)
+    _y = Dense(classes, activation='softmax')(_y)
+    _y = Reshape((classes,1))(_y)
 
 len_multi_opt_size = len(multi_opt_size)
 if len_multi_opt_size == 3:
@@ -128,18 +130,27 @@ if len_multi_opt_size == 3:
     _y2 = TimeDistributed(y2)(input_y2)
     _y2 = LSTM(n_neurons, return_sequences=True)(_y2)
     _y2 = Flatten()(_y2)
-    _y2 = Dropout(0.5)(_y2)
-    _y2 = Dense(classes, activation='softmax')(_y2)
-    _y2 = Reshape((classes,1))(_y2)
+    if fusion == 'score':
+        _y2 = Dropout(0.5)(_y2)
+        _y2 = Dense(classes, activation='softmax')(_y2)
+        _y2 = Reshape((classes,1))(_y2)
 
 # Fusion
-if len_multi_opt_size == 2:
-    z = Concatenate(axis=2)([_x, _y])
-else:
-    z = Concatenate(axis=2)([_x, _y, _y2])
+if fusion == 'score':
+    if len_multi_opt_size == 2:
+        z = Concatenate(axis=2)([_x, _y])
+    else:
+        z = Concatenate(axis=2)([_x, _y, _y2])
 
-z = Conv1D(filters=1,kernel_size=1,use_bias=False)(z)
-z = Flatten()(z)
+    z = Conv1D(filters=1,kernel_size=1,use_bias=False)(z)
+    z = Flatten()(z)
+else:
+    if len_multi_opt_size == 2:
+        z = Concatenate()([_x, _y])
+    else:
+        z = Concatenate()([_x, _y, _y2])
+    z = Dropout(0.5)(z)
+    z = Dense(classes, activation='softmax')(z)
 
 # Final touch
 if len_multi_opt_size == 2:
@@ -147,10 +158,10 @@ if len_multi_opt_size == 2:
 else:
     result_model = Model(inputs=[input_x, input_y, input_y2], outputs=z)
 
-# result_model.summary()
+result_model.summary()
 
 result_model.compile(loss=consensus_categorical_crossentropy,
-              optimizer=optimizers.SGD(lr=0.005, decay=1e-5, momentum=0.9, nesterov=False),
+              optimizer=optimizers.SGD(lr=0.5e-4, decay=1e-6, momentum=0.9, nesterov=False),
               # optimizer=optimizers.SGD(lr=0.005, decay=1e-5, momentum=0.9, nesterov=False),
               metrics=['accuracy'])
 
