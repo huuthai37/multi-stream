@@ -14,6 +14,7 @@ from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 import mobilenet
 from loss import consensus_categorical_crossentropy
+from norm import SumNorm
 
 # multiple_stream_consensus.py [train|retrain|test]{+cross} {batch} {classes} {epochs} {fusion} [list 4 single epochs] {cross index}
 if len(sys.argv) < 6:
@@ -56,6 +57,7 @@ for i in range(len(arr_opt_size)):
 depth = 20
 input_shape = (224,224,depth)
 seq_len = 3
+sum_norm = SumNorm
 
 server = config.server()
 data_output_path = config.data_output_path()
@@ -142,7 +144,7 @@ if fusion == 'score':
     else:
         z = Concatenate(axis=2)([_x, _y, _y2])
 
-    z = Conv1D(filters=1,kernel_size=1,use_bias=False)(z)
+    z = Conv1D(filters=1,kernel_size=1,use_bias=False, kernel_constraint=sum_norm())(z)
     z = Flatten()(z)
 else:
     if len_multi_opt_size == 2:
@@ -165,7 +167,7 @@ result_model.compile(loss='categorical_crossentropy',
               # optimizer=optimizers.SGD(lr=0.005, decay=1e-5, momentum=0.9, nesterov=False),
               metrics=['accuracy'])
 
-print multi_opt_size
+# print multi_opt_size
 
 if train:
     if retrain:
@@ -230,6 +232,8 @@ if train:
 
         with open('histories/multiple_consensus{}_{}_{}_{}e_cr{}'.format(opt_size,fusion,old_epochs, epochs,cross_index), 'wb') as file_pi:
             pickle.dump(histories, file_pi)
+        if fusion == 'score':
+            print result_model.layers[-2].get_weights()
 
 else:
     result_model.load_weights('weights/multiple_consensus{}_{}_{}e_cr{}.h5'.format(opt_size,fusion,epochs,cross_index))
