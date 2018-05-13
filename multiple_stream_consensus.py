@@ -113,7 +113,11 @@ y = mobilenet.mobilenet_remake(
 )
 _y = TimeDistributed(y)(input_y)
 _y = LSTM(n_neurons, return_sequences=True)(_y)
-_y = Flatten()(_y)
+if fusion != 'feature_avg':
+    _y = Flatten()(_y)
+else:
+    _y = AveragePooling1D(pool_size=seq_len)(_y)
+    _y = Flatten()(_y)
 if fusion == 'score':
     _y = Dropout(0.5)(_y)
     _y = Dense(classes, activation='softmax')(_y)
@@ -131,7 +135,11 @@ if len_multi_opt_size == 3:
     )
     _y2 = TimeDistributed(y2)(input_y2)
     _y2 = LSTM(n_neurons, return_sequences=True)(_y2)
-    _y2 = Flatten()(_y2)
+    if fusion != 'feature_avg':
+        _y2 = Flatten()(_y2)
+    else:
+        _y2 = AveragePooling1D(pool_size=seq_len)(_y2)
+        _y2 = Flatten()(_y2)
     if fusion == 'score':
         _y2 = Dropout(0.5)(_y2)
         _y2 = Dense(classes, activation='softmax')(_y2)
@@ -160,11 +168,11 @@ if len_multi_opt_size == 2:
 else:
     result_model = Model(inputs=[input_x, input_y, input_y2], outputs=z)
 
-# result_model.summary()
+result_model.summary()
 
 result_model.compile(loss='categorical_crossentropy',
               optimizer=optimizers.SGD(lr=5e-4, decay=1e-6, momentum=0.9, nesterov=False),
-              # optimizer=optimizers.SGD(lr=0.005, decay=1e-5, momentum=0.9, nesterov=False),
+              # optimizer=optimizers.SGD(lr=5e-4, decay=1e-6, momentum=0.9, nesterov=False),
               metrics=['accuracy'])
 
 # print multi_opt_size
